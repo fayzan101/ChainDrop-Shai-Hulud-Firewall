@@ -1,0 +1,66 @@
+# Secrets and local config
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+secrets/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.turbo/
+.next/
+out/
+coverage/
+
+# Vector DB and model artifacts
+chroma_db/
+*.bin
+*.gguf
+data/embeddings/
+data/raw/malicious/
+!data/raw/malicious/README.md
+
+# Sandbox runtime
+sandbox/work/
+sandbox/captures/
+*.pcap
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Logs and local databases
+*.log
+*.sqlite
+*.db
+postgres-data/
+
+# Evaluation outputs (regenerate, do not commit raw malware)
+eval/artifacts/
+eval/reports/tmp/
