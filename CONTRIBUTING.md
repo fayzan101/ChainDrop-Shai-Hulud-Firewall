@@ -11,7 +11,7 @@ Thank you for helping build a defensive supply-chain firewall. Read [SECURITY.md
 
 ## Development workflow
 
-1. Open an issue describing the change (interceptor, classifier, sandbox, RAG, policy, dashboard, or docs).
+1. Pick an issue from the [phased epic](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/15) (or a `good first issue`).
 2. Branch from `main`: `feat/<area>-<short-name>` or `fix/<area>-<short-name>`.
 3. Keep PRs small. The interceptor, sandbox, and RAG corpus versioning are easy to review in isolation and dangerous to mix.
 4. Update the relevant document under `docs/` in the same PR if behavior or an interface changes.

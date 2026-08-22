@@ -64,3 +64,6 @@ postgres-data/
 # Evaluation outputs (regenerate, do not commit raw malware)
 eval/artifacts/
 eval/reports/tmp/
+
+# Local GitHub issue body drafts
+.github/issue-drafts/
