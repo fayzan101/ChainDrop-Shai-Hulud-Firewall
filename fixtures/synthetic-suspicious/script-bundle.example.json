@@ -1,0 +1,11 @@
+{
+  "package_name": "sentryhulud-fixture-suspicious",
+  "version": "0.0.0-synthetic",
+  "hook": "preinstall",
+  "integrity": "sha512-fixture-synthetic-not-a-real-sri",
+  "resolved": null,
+  "script_sha256": "28a15a29eb9a0cd5082cdbf0080bc15bcc80a65d750a0485e5f8ac7c3fd28858",
+  "source_path": "setup.js",
+  "inline_command": "node setup.js",
+  "parent_chain": []
+}

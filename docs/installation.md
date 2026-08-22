@@ -1,6 +1,6 @@
 # Installation
 
-Code is not in the repository yet. This page is the **target** setup so Semester 1 implementation has a single bootstrap story. Commands will be filled as packages land.
+Phase 0 is in the repo (`npm test`, pytest stubs). Later phases fill each package. Commands below are the bootstrap story as components land.
 
 ## Prerequisites
 
