@@ -1,0 +1,13 @@
+[project]
+name = "sentryhulud-classifier"
+version = "0.0.0"
+description = "Static features and ML triage (Phase 0 stub)"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

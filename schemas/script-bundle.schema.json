@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sentryhulud.dev/schemas/script-bundle.json",
+  "title": "ScriptBundle",
+  "description": "One captured npm lifecycle script. Bytes are referenced by hash; never execute the script on the host.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "package_name",
+    "version",
+    "hook",
+    "integrity",
+    "script_sha256",
+    "source_path"
+  ],
+  "properties": {
+    "package_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "npm package name, including scope if present"
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "hook": {
+      "type": "string",
+      "enum": ["preinstall", "install", "postinstall"]
+    },
+    "integrity": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Subresource integrity string from the lockfile (e.g. sha512-...)"
+    },
+    "resolved": {
+      "type": ["string", "null"],
+      "description": "Registry tarball URL"
+    },
+    "script_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "source_path": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Path inside the extracted tarball or inline:package.json"
+    },
+    "inline_command": {
+      "type": ["string", "null"],
+      "description": "Raw package.json scripts.<hook> string when the hook is a shell command"
+    },
+    "parent_chain": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Dependency parents from the lockfile, root last or documented order"
+    }
+  }
+}

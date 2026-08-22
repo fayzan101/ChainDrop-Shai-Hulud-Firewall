@@ -1,0 +1,9 @@
+{
+  "name": "sentryhulud-fixture-suspicious",
+  "version": "0.0.0-synthetic",
+  "private": true,
+  "description": "Synthetic suspicious preinstall fixture. Not malware. Never execute setup.js.",
+  "scripts": {
+    "preinstall": "node setup.js"
+  }
+}

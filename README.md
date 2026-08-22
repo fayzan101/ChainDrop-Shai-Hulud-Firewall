@@ -32,7 +32,7 @@ SentryHulud's research claim is that a pipeline which **reasons about behavior a
 
 ## Status
 
-Documentation and project scaffolding. Implementation follows the [semester timeline](docs/timeline.md).
+**Phase 0 scaffold** is in-tree (package layout, `ScriptBundle` schema, fixtures, CI). Implementation order: [implementation phases](docs/implementation-phases.md). Academic calendar: [timeline](docs/timeline.md).
 
 ## Documentation
 
@@ -54,7 +54,7 @@ Documentation and project scaffolding. Implementation follows the [semester time
 - **No real secrets in the sandbox.** Canary credentials only.
 - **Held-out evaluation.** Classifier and RAG corpus are built without ChainDrop; ChainDrop is the unseen-variant test.
 
-## Repository layout (planned)
+## Repository layout
 
 ```
 action/          GitHub Action (interceptor + policy gate)
@@ -66,8 +66,12 @@ api/             NestJS backend, PostgreSQL, audit log
 dashboard/       Next.js analyst console
 data/            Labeled scripts and versioned RAG corpus (no raw malware in git)
 eval/            Held-out experiment harness
+fixtures/        Benign lockfile + synthetic suspicious scripts (never execute)
+schemas/         ScriptBundle JSON schema
 docs/            This documentation set
 ```
+
+Local checks: `npm test` and `python -m pytest classifier/tests eval/tests -q`.
 
 ## Responsible use
 
