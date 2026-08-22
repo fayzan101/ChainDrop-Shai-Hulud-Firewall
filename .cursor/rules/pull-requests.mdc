@@ -47,4 +47,4 @@ If the PR is docs-only, keep Summary + Test plan (“docs render / links”). If
 
 ## After create
 
-Return the PR URL. Do not merge unless asked. Do not `--no-verify`.
+Return the PR URL. Do not merge unless asked. Do not `--no-verify`. Do not mention `cursor.com` or Cursor product URLs in the title or body.

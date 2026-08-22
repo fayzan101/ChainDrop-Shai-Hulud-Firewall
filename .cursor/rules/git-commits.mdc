@@ -31,4 +31,6 @@ EOF
 )"` — on Windows PowerShell, use an equivalent non-interactive message (`-m` with a here-string or a single `-m` paragraph). Do not use `git commit -i` / `git add -i`.
 4. `git status` to verify. Do not push unless asked.
 
+Do not mention `cursor.com` or Cursor product URLs in the commit message (see `no-cursor-branding` rule).
+
 Classifier/corpus commits must not sneak ChainDrop into `train`/`val` or `no-chaindrop` corpus.
