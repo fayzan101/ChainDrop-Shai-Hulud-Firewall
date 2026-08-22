@@ -1,0 +1,34 @@
+---
+description: When and how to create git commits
+alwaysApply: true
+---
+
+# Git commits
+
+- Commit **only** when the user asks. If unclear, ask.
+- Do not update git config, skip hooks, or amend unless the user asked **and** amend rules in the user git protocol are met (this agent’s commit, not pushed, or hook-fixed files). Never amend a failed hook; make a new commit.
+
+## Message
+
+Conventional, imperative, 1–2 sentences on **why**:
+
+```
+feat(classifier): add entropy features so triage can skip obviously minified droppers
+
+docs: add implementation phases so coding order matches the FYP timeline
+```
+
+Types: `feat`, `fix`, `docs`, `chore`, `test`, `refactor`, `eval`. Scope = area (`interceptor`, `action`, …).
+
+## Procedure
+
+1. Parallel: `git status`, `git diff`, `git log -8 --oneline` (match repo style).
+2. Stage only intended files. Do not add `.env`, credentials, `data/raw/malicious/` blobs, or sandbox captures.
+3. `git commit -m "$(cat <<'EOF'
+message
+
+EOF
+)"` — on Windows PowerShell, use an equivalent non-interactive message (`-m` with a here-string or a single `-m` paragraph). Do not use `git commit -i` / `git add -i`.
+4. `git status` to verify. Do not push unless asked.
+
+Classifier/corpus commits must not sneak ChainDrop into `train`/`val` or `no-chaindrop` corpus.

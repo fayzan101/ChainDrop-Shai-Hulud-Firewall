@@ -42,6 +42,7 @@ Documentation and project scaffolding. Implementation follows the [semester time
 | [Project proposal](docs/proposal.md) | Formal FYP proposal (abstract through deliverables) |
 | [Architecture](docs/architecture.md) | Nine-stage pipeline and component design |
 | [Evaluation plan](docs/evaluation.md) | Held-out ChainDrop experiment and metrics |
+| [Implementation phases](docs/implementation-phases.md) | What to code next (Phases 0–8) |
 | [Installation](docs/installation.md) | Local and CI setup (when code lands) |
 | [Security policy](SECURITY.md) | Vulnerability reporting and sandbox rules |
 

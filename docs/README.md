@@ -15,6 +15,7 @@ Start with the [project proposal](proposal.md) if you need the full academic fra
 | [evaluation.md](evaluation.md) | Held-out-generation protocol, ablations, metrics |
 | [dataset.md](dataset.md) | Corpus design, labels, split rules, licensing |
 | [timeline.md](timeline.md) | Semester 1–2 milestones and Gantt |
+| [implementation-phases.md](implementation-phases.md) | Engineering build order, exit criteria, start-here |
 | [technology-stack.md](technology-stack.md) | Languages and services by layer |
 | [glossary.md](glossary.md) | Project terms |
 | [report-outline.md](report-outline.md) | Final report and defense structure |

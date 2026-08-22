@@ -2,6 +2,8 @@
 
 Two-semester final-year project. Weeks are calendar weeks within each semester. Adjust to the department's actual term dates; the **sequence** is the constraint.
 
+For **what to code next** (exit criteria, demos, parallel dataset work), use [implementation-phases.md](implementation-phases.md). This file is the academic calendar.
+
 ## Semester 1 — foundations and detector core
 
 | Weeks | Milestone | Primary docs / artifacts |

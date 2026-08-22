@@ -1,0 +1,50 @@
+---
+description: How to write and open GitHub pull requests for SentryHulud
+alwaysApply: true
+---
+
+# Pull requests
+
+Only open a PR when the user asks. Use `gh pr create` (not the GitHub website). Push first if the branch has no upstream.
+
+## Before opening
+
+In parallel: `git status`, `git diff`, `git log`, `git diff main...HEAD`, and whether the branch tracks origin. Do not commit secrets, `.env`, or malware blobs.
+
+## Title
+
+`<type>(<area>): <imperative why/what>` — match the branch type.
+
+```
+✅ feat(interceptor): extract lifecycle scripts from lockfiles without executing them
+❌ update stuff
+```
+
+## Body (required HEREDOC)
+
+```markdown
+## Summary
+- 1–3 bullets on **why** this change exists (user-facing / pipeline stage).
+- Name the implementation phase (0–8) if applicable.
+- Call out held-out / ChainDrop / sandbox impact if any.
+
+## Changes
+- Files/areas touched (interceptor, classifier, docs, …).
+- Schema or `feature_schema_version` / `model_version` / `corpus_version` bumps.
+
+## Test plan
+- [ ] Command or fixture used (e.g. `fixtures/benign-lockfile`)
+- [ ] Lifecycle scripts are **not** executed on the host/runner
+- [ ] No secrets in logs or the diff
+- [ ] Held-out split unchanged (or explain)
+- [ ] Docs updated if behavior or an interface changed
+
+## Security
+- Sandbox / fail-closed / dual-use: what this PR does **not** enable.
+```
+
+If the PR is docs-only, keep Summary + Test plan (“docs render / links”). If it is eval/corpus, explicitly state ChainDrop stays `heldout`.
+
+## After create
+
+Return the PR URL. Do not merge unless asked. Do not `--no-verify`.
