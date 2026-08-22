@@ -1,5 +1,9 @@
 # SentryHulud
 
+[![CI](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/actions/workflows/ci.yml/badge.svg)](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Issues](https://img.shields.io/github/issues/fayzan101/ChainDrop-Shai-Hulud-Firewall)](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues)
+
 A RAG-augmented AI firewall for detecting self-propagating npm supply-chain worms in CI/CD pipelines.
 
 SentryHulud intercepts `preinstall`, `install`, and `postinstall` scripts across a project's dependency tree **before they run**, triages them with a lightweight classifier, detonates suspicious scripts in a credential-free sandbox, and asks a retrieval-grounded language model whether the observed behavior resembles documented Shai-Hulud-lineage techniques. The CI job is then allowed, quarantined, or blocked with an explainable verdict.
@@ -32,7 +36,7 @@ SentryHulud's research claim is that a pipeline which **reasons about behavior a
 
 ## Status
 
-**Phase 0 scaffold** is in-tree (package layout, `ScriptBundle` schema, fixtures, CI). Implementation order: [implementation phases](docs/implementation-phases.md). Academic calendar: [timeline](docs/timeline.md).
+**Phase 0 scaffold** is in-tree. **Next:** [Phase 1 interceptor](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/3). Full tracker: [epic #15](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/15). Order: [implementation phases](docs/implementation-phases.md). Academic calendar: [timeline](docs/timeline.md). How this repo gets reach without spam: [community](docs/community.md).
 
 ## Documentation
 
@@ -43,6 +47,7 @@ SentryHulud's research claim is that a pipeline which **reasons about behavior a
 | [Architecture](docs/architecture.md) | Nine-stage pipeline and component design |
 | [Evaluation plan](docs/evaluation.md) | Held-out ChainDrop experiment and metrics |
 | [Implementation phases](docs/implementation-phases.md) | What to code next (Phases 0–8) |
+| [Community](docs/community.md) | Discoverability without star-farming |
 | [Installation](docs/installation.md) | Local and CI setup (when code lands) |
 | [Security policy](SECURITY.md) | Vulnerability reporting and sandbox rules |
 
