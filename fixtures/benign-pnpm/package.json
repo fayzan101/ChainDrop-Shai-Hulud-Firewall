@@ -1,0 +1,9 @@
+{
+  "name": "sentryhulud-fixture-benign-pnpm",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Synthetic clean pnpm lockfile fixture. Do not enable lifecycle scripts.",
+  "scripts": {
+    "install": "node-gyp rebuild"
+  }
+}

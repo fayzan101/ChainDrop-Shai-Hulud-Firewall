@@ -28,3 +28,25 @@ test("Phase 0 fixture lockfiles exist and are not executed here", () => {
   const digest = createHash("sha256").update(suspiciousSrc, "utf8").digest("hex");
   assert.equal(example.script_sha256, digest);
 });
+
+test("Phase 1 benign pnpm lockfile fixture exists", () => {
+  const pnpmLock = join(root, "fixtures/benign-pnpm/pnpm-lock.yaml");
+  const pnpmPkg = join(root, "fixtures/benign-pnpm/package.json");
+  const pnpmReadme = join(root, "fixtures/benign-pnpm/README.md");
+  assert.ok(existsSync(pnpmLock));
+  assert.ok(existsSync(pnpmPkg));
+  assert.ok(existsSync(pnpmReadme));
+  const readme = readFileSync(pnpmReadme, "utf8");
+  assert.match(readme, /do not/i);
+  const pkg = JSON.parse(readFileSync(pnpmPkg, "utf8"));
+  assert.equal(pkg.scripts.install, "node-gyp rebuild");
+  const lock = readFileSync(pnpmLock, "utf8");
+  assert.match(lock, /lockfileVersion/);
+  assert.match(lock, /node-gyp/);
+  const example = JSON.parse(
+    readFileSync(join(root, "fixtures/benign-pnpm/script-bundle.example.json"), "utf8"),
+  );
+  assert.equal(example.hook, "install");
+  assert.equal(example.inline_command, "node-gyp rebuild");
+});
+
