@@ -1,0 +1,11 @@
+{
+  "package_name": "node-gyp",
+  "version": "10.0.0",
+  "hook": "install",
+  "integrity": "sha512-fixture-benign-yarn-not-a-real-sri",
+  "resolved": "https://registry.npmjs.org/node-gyp/-/node-gyp-10.0.0.tgz",
+  "script_sha256": "55941a60816361a50d221482fed3b3842464f10af4371a667af4268d13b953a2",
+  "source_path": "inline:package.json",
+  "inline_command": "node-gyp rebuild",
+  "parent_chain": ["sentryhulud-fixture-benign-yarn"]
+}

@@ -48,8 +48,18 @@ test("fixture ScriptBundle examples validate", () => {
   const suspicious = loadJson(
     "fixtures/synthetic-suspicious/script-bundle.example.json",
   );
+  const benignPnpm = loadJson(
+    "fixtures/benign-pnpm/script-bundle.example.json",
+  );
+  const benignYarn = loadJson(
+    "fixtures/benign-yarn/script-bundle.example.json",
+  );
   assertScriptBundle(benign, "benign");
   assertScriptBundle(suspicious, "suspicious");
+  assertScriptBundle(benignPnpm, "benign-pnpm");
+  assertScriptBundle(benignYarn, "benign-yarn");
   assert.equal(benign.hook, "install");
   assert.equal(suspicious.hook, "preinstall");
+  assert.equal(benignPnpm.hook, "install");
+  assert.equal(benignYarn.hook, "install");
 });

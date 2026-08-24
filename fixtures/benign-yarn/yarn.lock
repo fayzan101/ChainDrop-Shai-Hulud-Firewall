@@ -1,0 +1,7 @@
+# THIS IS A SYNTHETIC FIXTURE. Do not run yarn install here.
+# yarn lockfile v1
+
+node-gyp@10.0.0:
+  version "10.0.0"
+  resolved "https://registry.npmjs.org/node-gyp/-/node-gyp-10.0.0.tgz"
+  integrity sha512-fixture-benign-yarn-not-a-real-sri
