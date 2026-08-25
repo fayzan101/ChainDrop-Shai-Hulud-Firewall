@@ -2,14 +2,17 @@
   "name": "sentryhulud",
   "private": true,
   "version": "0.0.0",
-  "description": "RAG-augmented npm lifecycle-script firewall (Phase 0 scaffold)",
+  "description": "RAG-augmented npm lifecycle-script firewall",
   "license": "MIT",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "test": "node --test schemas/script-bundle.test.mjs fixtures/fixtures.test.mjs interceptor/extract.test.mjs interceptor/no-execute.test.mjs",
+    "test": "node --test schemas/script-bundle.test.mjs fixtures/fixtures.test.mjs interceptor/extract.test.mjs interceptor/no-execute.test.mjs classifier/features.test.mjs",
     "intercept": "node interceptor/cli.mjs",
     "test:classifier": "python -m pytest classifier/tests -q"
+  },
+  "dependencies": {
+    "acorn": "^8.14.1"
   }
 }

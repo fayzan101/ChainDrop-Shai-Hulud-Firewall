@@ -13,8 +13,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - name: Node fixture and schema tests
-        run: npm test
+      - name: Node fixture, interceptor, and feature tests
+        run: |
+          npm ci
+          npm test
 
   python:
     runs-on: ubuntu-latest
