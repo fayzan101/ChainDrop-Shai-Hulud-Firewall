@@ -1,5 +1,9 @@
-# GitHub Action (Phase 0)
+# GitHub Action
 
-Interceptor + policy gate. Not implemented yet (Phase 1 / Phase 4).
+Policy gate lands in Phase 4. Phase 1 interceptor (no install execution):
 
-Do not execute captured lifecycle scripts on the runner.
+```bash
+node interceptor/cli.mjs --dir .
+```
+
+See `interceptor/README.md`.

@@ -36,7 +36,7 @@ SentryHulud's research claim is that a pipeline which **reasons about behavior a
 
 ## Status
 
-**Phase 0 scaffold** is in-tree. **Next:** [Phase 1 interceptor](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/3). Full tracker: [epic #15](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/15). Order: [implementation phases](docs/implementation-phases.md). Academic calendar: [timeline](docs/timeline.md). How this repo gets reach without spam: [community](docs/community.md).
+**Phase 1 interceptor** is in-tree (`node interceptor/cli.mjs --dir <project>`). **Next:** [Phase 2 static features](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/4) / [#24](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/24). Tracker: [epic #15](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/15).
 
 ## Documentation
 
@@ -62,7 +62,8 @@ SentryHulud's research claim is that a pipeline which **reasons about behavior a
 ## Repository layout
 
 ```
-action/          GitHub Action (interceptor + policy gate)
+action/          GitHub Action (policy gate, Phase 4)
+interceptor/     Lifecycle-script capture (Phase 1; never executes scripts)
 classifier/      Feature extraction and ML triage
 sandbox/         Isolated dry-run and behavior capture
 rag/             Corpus ingestion, embeddings, retrieval
@@ -77,6 +78,10 @@ docs/            This documentation set
 ```
 
 Local checks: `npm test` and `python -m pytest classifier/tests eval/tests -q`.
+
+```bash
+node interceptor/cli.mjs --dir fixtures/benign-lockfile
+```
 
 ## Responsible use
 
