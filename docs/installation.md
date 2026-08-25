@@ -1,6 +1,6 @@
 # Installation
 
-Phase 0 is in the repo (`npm test`, pytest stubs). Later phases fill each package. Commands below are the bootstrap story as components land.
+Phase 1 interceptor is in the repo (`npm test`, `node interceptor/cli.mjs --dir <project>`). Later phases fill remaining packages.
 
 ## Prerequisites
 

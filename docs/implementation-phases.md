@@ -64,6 +64,8 @@ flowchart LR
 - A test asserts `child_process` / `npm install` is **not** used to execute those scripts
 - Missing lockfile fails closed
 
+Tarball download by integrity is issue #22 (offline CI uses on-disk `package.json` only).
+
 **Semester 1 demo (partial):** this plus Phase 2 is the interceptor half of the S1 bar.
 
 ---

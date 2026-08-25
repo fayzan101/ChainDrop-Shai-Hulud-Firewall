@@ -8,7 +8,8 @@
     "node": ">=20"
   },
   "scripts": {
-    "test": "node --test schemas/script-bundle.test.mjs fixtures/fixtures.test.mjs",
+    "test": "node --test schemas/script-bundle.test.mjs fixtures/fixtures.test.mjs interceptor/extract.test.mjs interceptor/no-execute.test.mjs",
+    "intercept": "node interceptor/cli.mjs",
     "test:classifier": "python -m pytest classifier/tests -q"
   }
 }
