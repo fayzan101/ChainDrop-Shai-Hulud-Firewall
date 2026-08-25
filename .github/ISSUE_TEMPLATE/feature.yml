@@ -1,0 +1,38 @@
+name: Feature request
+description: Suggest a defensive improvement to SentryHulud
+title: "feat: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Requests enabling malware, credential harvesting, phishing, registry abuse, or offensive payload generation are out of scope. Review the [Security Policy](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/security/policy).
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user, research, or pipeline problem would this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe the desired behavior without live payloads or exploit instructions.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Security and evaluation impact
+      description: Explain sandbox, fail-closed, dual-use, and held-out or ChainDrop implications.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: This request is defensive and does not enable offensive payload generation.
+          required: true
+        - label: I included no secrets, private data, malware payloads, or live exploit code.
+          required: true

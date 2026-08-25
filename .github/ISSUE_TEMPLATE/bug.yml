@@ -1,0 +1,43 @@
+name: Bug report
+description: Report a reproducible problem in SentryHulud
+title: "bug: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include secrets, malware payloads, live exploit code, or private data. Report vulnerabilities privately through the [Security Policy](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/security/policy).
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe the problem and its impact.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Safe reproduction steps
+      description: Use only synthetic or benign fixtures. Do not include live payloads.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: Captured scripts were not executed on the host or runner.
+          required: true
+        - label: I removed secrets, private data, malware payloads, and live exploit code.
+          required: true
