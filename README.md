@@ -36,7 +36,7 @@ SentryHulud's research claim is that a pipeline which **reasons about behavior a
 
 ## Status
 
-**Phase 1 interceptor** is in-tree (`node interceptor/cli.mjs --dir <project>`). **Next:** [Phase 2 static features](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/4) / [#24](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/24). Tracker: [epic #15](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/15).
+**Phase 2 static features** are in-tree (`classifier/features.mjs`, schema `1.0.0`). **Next:** [Phase 3 ML triage](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/5). Tracker: [epic #15](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/15).
 
 ## Documentation
 
