@@ -36,7 +36,7 @@ SentryHulud's research claim is that a pipeline which **reasons about behavior a
 
 ## Status
 
-**Phase 2 static features** are in-tree (`classifier/features.mjs`, schema `1.0.0`). **Next:** [Phase 3 ML triage](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/5). Tracker: [epic #15](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/15).
+**Phase 3 ML triage** is in-tree (`python -m classifier.train`, synthetic gens 1–3 only). **Next:** [Phase 4 GitHub Action gate](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/7). Tracker: [epic #15](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/15).
 
 ## Documentation
 

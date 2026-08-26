@@ -10,7 +10,7 @@
   "scripts": {
     "test": "node --test schemas/script-bundle.test.mjs fixtures/fixtures.test.mjs interceptor/extract.test.mjs interceptor/no-execute.test.mjs classifier/features.test.mjs",
     "intercept": "node interceptor/cli.mjs",
-    "test:classifier": "python -m pytest classifier/tests -q"
+    "test:classifier": "python -m pytest classifier/tests eval/tests -q"
   },
   "dependencies": {
     "acorn": "^8.14.1"
