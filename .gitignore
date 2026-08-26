@@ -39,9 +39,12 @@ coverage/
 chroma_db/
 *.bin
 *.gguf
+*.joblib
 data/embeddings/
 data/raw/malicious/
 !data/raw/malicious/README.md
+classifier/artifacts/*
+!classifier/artifacts/README.md
 
 # Sandbox runtime
 sandbox/work/

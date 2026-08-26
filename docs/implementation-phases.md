@@ -103,6 +103,8 @@ Tarball download by integrity is issue #22 (offline CI uses on-disk `package.jso
 
 If the real malicious store is not ready, train on **synthetic** malicious-shaped scripts plus benign registry samples, and document that the frozen paper model comes later.
 
+Implemented as `classifier/train.py` + `classifier/triage.py` with `model_version=triage-synth-0.1.0`. sklearn `HistGradientBoostingClassifier` + `LogisticRegression` baseline (XGBoost-compatible role without a native binary). Offline ranking via `explain.py`.
+
 ---
 
 ## Phase 4 — GitHub Action policy gate (stage 8, classifier-only)
