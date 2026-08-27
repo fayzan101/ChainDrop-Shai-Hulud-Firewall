@@ -26,22 +26,24 @@ jobs:
           node-version: "20"
           cache: npm
 
-      - uses: <org>/Sentryhulud@<full-commit-sha>
+      - uses: fayzan101/ChainDrop-Shai-Hulud-Firewall/action@<full-commit-sha>
         with:
-          package-manager: npm
-          lockfile: package-lock.json
-          api-url: ${{ secrets.SENTRYHULUD_API_URL }}
-          api-token: ${{ secrets.SENTRYHULUD_API_TOKEN }}
-          corpus-version: production
+          working-directory: .
+          fail-open: "false"
           threshold-quarantine: "40"
           threshold-block: "80"
-          fail-open: "false"
+          verdict-path: sentryhulud-verdict.json
 
       - run: npm test
         if: success()
 ```
 
-Until the Action is published, this file is the contract implementers must satisfy.
+Local equivalent: `node action/scan.mjs --dir . --out sentryhulud-verdict.json`.
+
+Phase 4 ships **classifier-only** (evaluation config **a**): interceptor + static features + policy. `sandbox` / `rag` inputs from the full contract remain deferred to Phases 5–6.
+
+Until the Action is published under a release tag, pin a commit SHA as above.
+
 
 ## Inputs
 

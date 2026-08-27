@@ -1,0 +1,50 @@
+name: sentryhulud-fixtures
+
+# Demonstrate Phase 4 gate: benign allow, synthetic suspicious block.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  allow-benign:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./action
+        with:
+          working-directory: fixtures/benign-lockfile
+          verdict-path: benign-verdict.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benign-verdict
+          path: benign-verdict.json
+
+  block-suspicious:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Expect block on synthetic suspicious fixture
+        id: scan
+        continue-on-error: true
+        uses: ./action
+        with:
+          working-directory: fixtures/synthetic-suspicious
+          verdict-path: suspicious-verdict.json
+      - name: Assert Action failed the step
+        run: |
+          if [ "${{ steps.scan.outcome }}" != "failure" ]; then
+            echo "expected failure, got ${{ steps.scan.outcome }}"
+            exit 1
+          fi
+          test -f suspicious-verdict.json
+          python -c "import json; v=json.load(open('suspicious-verdict.json')); assert v['action']=='block', v"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: suspicious-verdict
+          path: suspicious-verdict.json
