@@ -125,6 +125,8 @@ Implemented as `classifier/train.py` + `classifier/triage.py` with `model_versio
 
 **Semester 1 demo bar (complete):** lockfile → scripts → features → classify → no host execution.
 
+Implemented as `action/scan.mjs` + composite `action/action.yml` (config **a**). Risk scores come from Phase-2 `suspicion_score` mapped to 0–100; quarantine/block fail the step and write `sentryhulud-verdict.json`.
+
 ---
 
 ## Phase 5 — Sandbox (stage 4)

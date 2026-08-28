@@ -1,0 +1,69 @@
+name: SentryHulud
+description: Lifecycle-script firewall for npm CI (Phase 4 classifier-only gate). Never executes install hooks.
+author: SentryHulud
+
+inputs:
+  working-directory:
+    description: Project directory containing the lockfile
+    required: false
+    default: "."
+  fail-open:
+    description: If true, interceptor errors warn and allow (not recommended)
+    required: false
+    default: "false"
+  threshold-quarantine:
+    description: Inclusive lower bound for quarantine (0-100)
+    required: false
+    default: "40"
+  threshold-block:
+    description: Scores above this value block (0-100)
+    required: false
+    default: "80"
+  verdict-path:
+    description: Path to write sentryhulud-verdict.json
+    required: false
+    default: "sentryhulud-verdict.json"
+  lockfile:
+    description: Optional explicit lockfile path
+    required: false
+    default: ""
+
+outputs:
+  action:
+    description: allow | quarantine | block
+    value: ${{ steps.scan.outputs.action }}
+  risk_score:
+    description: Graph max risk score 0-100
+    value: ${{ steps.scan.outputs.risk_score }}
+  verdict_path:
+    description: Path to verdict JSON
+    value: ${{ steps.scan.outputs.verdict_path }}
+  degraded:
+    description: true if fail-open recovered from an error
+    value: ${{ steps.scan.outputs.degraded }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+
+    - name: Install Action dependencies
+      shell: bash
+      working-directory: ${{ github.action_path }}/..
+      run: npm ci
+
+    - name: Scan lifecycle scripts (no execute)
+      id: scan
+      shell: bash
+      working-directory: ${{ github.workspace }}
+      run: |
+        set -euo pipefail
+        ROOT="${{ github.action_path }}/.."
+        ARGS=(--dir "${{ inputs.working-directory }}" --out "${{ inputs.verdict-path }}" --fail-open "${{ inputs.fail-open }}" --threshold-quarantine "${{ inputs.threshold-quarantine }}" --threshold-block "${{ inputs.threshold-block }}" --github-output)
+        if [ -n "${{ inputs.lockfile }}" ]; then
+          ARGS+=(--lockfile "${{ inputs.lockfile }}")
+        fi
+        node "$ROOT/action/scan.mjs" "${ARGS[@]}"
