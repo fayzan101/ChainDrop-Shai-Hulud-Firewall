@@ -4,6 +4,10 @@
 
 const fs = require("node:fs");
 
+// Capture before hooks.cjs wraps fs — persist must not recurse into recordFile.
+const writeLogFile = fs.writeFileSync.bind(fs);
+const renameLogFile = fs.renameSync.bind(fs);
+
 const CANARY_MAP = new Map([
   ["/home/sandbox/.npmrc", "npm_token"],
   ["/home/sandbox/.aws/credentials", "aws_key"],
@@ -32,6 +36,13 @@ function createBehaviorState(scriptId) {
     _startedMs: started,
     recordFile(path, operation) {
       const normalized = normalizePath(path);
+      const logPath = process.env.SENTRYHULUD_LOG_PATH;
+      if (
+        logPath &&
+        (normalized === logPath || normalized === `${logPath}.tmp`)
+      ) {
+        return;
+      }
       this.files.push({ path: normalized, operation });
       const canaryId = CANARY_MAP.get(normalized);
       if (canaryId) {
@@ -67,8 +78,8 @@ function createBehaviorState(scriptId) {
       try {
         const payload = JSON.stringify(this.finalize(false));
         const tmp = `${path}.tmp`;
-        fs.writeFileSync(tmp, payload);
-        fs.renameSync(tmp, path);
+        writeLogFile(tmp, payload);
+        renameLogFile(tmp, path);
       } catch {
         // best-effort while the child is being torn down
       }
