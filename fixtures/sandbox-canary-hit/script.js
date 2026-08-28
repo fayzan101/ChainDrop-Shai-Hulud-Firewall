@@ -8,6 +8,6 @@ const net = require("node:net");
 
 fs.readFileSync("/home/sandbox/.npmrc", "utf8");
 
-const socket = net.connect({ port: 443, host: "exfil.sinkhole.test" });
-socket.on("error", () => {});
+// Literal IP avoids DNS stalls under --network none in CI.
+const socket = net.connect({ port: 443, host: "127.0.0.1" });
 socket.destroy();

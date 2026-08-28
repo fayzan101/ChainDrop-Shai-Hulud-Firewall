@@ -71,6 +71,7 @@ test("docker sandbox records canary read and socket attempt", async (t) => {
   assert.ok(log.canary_hits.length >= 1);
   assert.ok(log.net.length >= 1);
   assert.equal(log.canary_hits[0].canary_id, "npm_token");
+  assert.equal(log.net[0].port, 443);
 });
 
 test("docker sandbox timeout still emits partial BehaviorLog", async (t) => {

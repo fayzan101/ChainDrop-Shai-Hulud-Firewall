@@ -5,7 +5,6 @@
 const fs = require("node:fs");
 const net = require("node:net");
 const cp = require("node:child_process");
-const Module = require("node:module");
 const { createBehaviorState } = require("./state.cjs");
 
 const scriptId = process.env.SENTRYHULUD_SCRIPT_ID || "unknown";
@@ -81,15 +80,6 @@ for (const method of [
 
 patchNetModule(net);
 
-const originalRequire = Module.prototype.require;
-Module.prototype.require = function patchedRequire(id) {
-  const result = originalRequire.apply(this, arguments);
-  if (id === "net" || id === "node:net") {
-    patchNetModule(result);
-  }
-  return result;
-};
-
 const spawn = cp.spawn;
 cp.spawn = function wrappedSpawn(command, args, options) {
   state.recordProcess(command, args);
@@ -106,7 +96,13 @@ function flushOnSignal() {
   state.persist();
 }
 
-process.on("SIGTERM", flushOnSignal);
-process.on("SIGINT", flushOnSignal);
+process.once("SIGTERM", () => {
+  flushOnSignal();
+  process.exit(143);
+});
+process.once("SIGINT", () => {
+  flushOnSignal();
+  process.exit(130);
+});
 
 module.exports = state;

@@ -74,10 +74,11 @@ const timer = setTimeout(() => {
     if (!child.killed) {
       child.kill("SIGKILL");
     }
-  }, 150);
+  }, 500);
 }, timeoutMs);
 
 child.on("close", () => {
   clearTimeout(timer);
   emitLog(timedOut, childError);
+  process.exit(0);
 });

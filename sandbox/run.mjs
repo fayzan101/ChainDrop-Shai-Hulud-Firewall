@@ -79,7 +79,7 @@ export async function runInSandbox(opts) {
 
   try {
     const { stdout, stderr, code } = await execCapture(dockerBin, dockerArgs, {
-      timeoutMs: timeoutMs + 15000,
+      timeoutMs: Math.max(timeoutMs * 2 + 20000, 45000),
     });
     const line = stdout
       .trim()
