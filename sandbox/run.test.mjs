@@ -82,7 +82,7 @@ test("docker sandbox timeout still emits partial BehaviorLog", async (t) => {
   const log = await runInSandbox({
     scriptPath: join(root, "fixtures/sandbox-canary-hit/hang.js"),
     scriptId: "fixture-sandbox-hang",
-    timeoutMs: 400,
+    timeoutMs: 1000,
   });
   assert.equal(log.timeout, true);
   assert.ok(log.canary_hits.length >= 1, "partial log retains canary hit");

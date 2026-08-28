@@ -5,6 +5,7 @@
 const fs = require("node:fs");
 const net = require("node:net");
 const cp = require("node:child_process");
+const Module = require("node:module");
 const { createBehaviorState } = require("./state.cjs");
 
 const scriptId = process.env.SENTRYHULUD_SCRIPT_ID || "unknown";
@@ -32,6 +33,22 @@ function parseConnectArgs(args) {
     port = typeof args[1] === "number" ? args[1] : port;
   }
   return { host, port };
+}
+
+function patchNetModule(netModule) {
+  if (!netModule || netModule.__sentryhuludNetPatched) {
+    return netModule;
+  }
+  const originalCreateConnection = netModule.createConnection.bind(netModule);
+  function wrappedCreateConnection(...args) {
+    const { host, port } = parseConnectArgs(args);
+    recordNetAttempt(host, port, "tcp");
+    return originalCreateConnection(...args);
+  }
+  netModule.createConnection = wrappedCreateConnection;
+  netModule.connect = wrappedCreateConnection;
+  netModule.__sentryhuludNetPatched = true;
+  return netModule;
 }
 
 function wrapFsMethod(name) {
@@ -62,14 +79,16 @@ for (const method of [
   wrapFsMethod(method);
 }
 
-const originalCreateConnection = net.createConnection.bind(net);
-function wrappedCreateConnection(...args) {
-  const { host, port } = parseConnectArgs(args);
-  recordNetAttempt(host, port, "tcp");
-  return originalCreateConnection(...args);
-}
-net.createConnection = wrappedCreateConnection;
-net.connect = wrappedCreateConnection;
+patchNetModule(net);
+
+const originalRequire = Module.prototype.require;
+Module.prototype.require = function patchedRequire(id) {
+  const result = originalRequire.apply(this, arguments);
+  if (id === "net" || id === "node:net") {
+    patchNetModule(result);
+  }
+  return result;
+};
 
 const spawn = cp.spawn;
 cp.spawn = function wrappedSpawn(command, args, options) {
