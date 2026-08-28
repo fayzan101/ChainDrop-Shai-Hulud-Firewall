@@ -65,7 +65,10 @@ function createBehaviorState(scriptId) {
         return;
       }
       try {
-        fs.writeFileSync(path, JSON.stringify(this.finalize(false)));
+        const payload = JSON.stringify(this.finalize(false));
+        const tmp = `${path}.tmp`;
+        fs.writeFileSync(tmp, payload);
+        fs.renameSync(tmp, path);
       } catch {
         // best-effort while the child is being torn down
       }

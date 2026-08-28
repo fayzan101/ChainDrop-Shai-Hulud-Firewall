@@ -69,7 +69,12 @@ child.stderr.on("data", (chunk) => {
 
 const timer = setTimeout(() => {
   timedOut = true;
-  child.kill("SIGKILL");
+  child.kill("SIGTERM");
+  setTimeout(() => {
+    if (!child.killed) {
+      child.kill("SIGKILL");
+    }
+  }, 150);
 }, timeoutMs);
 
 child.on("close", () => {

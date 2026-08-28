@@ -5,11 +5,34 @@
 const fs = require("node:fs");
 const net = require("node:net");
 const cp = require("node:child_process");
-const { createBehaviorState, normalizePath } = require("./state.cjs");
+const { createBehaviorState } = require("./state.cjs");
 
 const scriptId = process.env.SENTRYHULUD_SCRIPT_ID || "unknown";
 const state = createBehaviorState(scriptId);
 global.__SENTRYHULUD_BEHAVIOR_STATE__ = state;
+
+function recordNetAttempt(host, port, protocol = "tcp") {
+  state.recordNet(host, port, protocol);
+}
+
+function parseConnectArgs(args) {
+  let host = "unknown";
+  let port = 0;
+  const first = args[0];
+  if (typeof first === "object" && first !== null) {
+    host = first.host || first.hostname || host;
+    port = first.port ?? port;
+  } else if (typeof first === "number") {
+    port = first;
+    if (typeof args[1] === "string") {
+      host = args[1];
+    }
+  } else if (typeof first === "string") {
+    host = first;
+    port = typeof args[1] === "number" ? args[1] : port;
+  }
+  return { host, port };
+}
 
 function wrapFsMethod(name) {
   const original = fs[name];
@@ -39,28 +62,14 @@ for (const method of [
   wrapFsMethod(method);
 }
 
-function wrapNetFactory(name) {
-  const original = net[name];
-  if (typeof original !== "function") {
-    return;
-  }
-  net[name] = function wrapped(...args) {
-    let host = "unknown";
-    let port = 0;
-    if (typeof args[0] === "object" && args[0] !== null) {
-      host = args[0].host || args[0].hostname || host;
-      port = args[0].port ?? port;
-    } else {
-      port = args[0];
-      host = args[1] || host;
-    }
-    state.recordNet(host, port, "tcp");
-    return original.apply(this, args);
-  };
+const originalCreateConnection = net.createConnection.bind(net);
+function wrappedCreateConnection(...args) {
+  const { host, port } = parseConnectArgs(args);
+  recordNetAttempt(host, port, "tcp");
+  return originalCreateConnection(...args);
 }
-
-wrapNetFactory("connect");
-wrapNetFactory("createConnection");
+net.createConnection = wrappedCreateConnection;
+net.connect = wrappedCreateConnection;
 
 const spawn = cp.spawn;
 cp.spawn = function wrappedSpawn(command, args, options) {
@@ -73,5 +82,12 @@ cp.spawnSync = function wrappedSpawnSync(command, args, options) {
   state.recordProcess(command, args);
   return spawnSync.call(this, command, args, options);
 };
+
+function flushOnSignal() {
+  state.persist();
+}
+
+process.on("SIGTERM", flushOnSignal);
+process.on("SIGINT", flushOnSignal);
 
 module.exports = state;
