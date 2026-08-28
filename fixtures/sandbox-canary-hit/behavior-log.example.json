@@ -1,0 +1,13 @@
+{
+  "behavior_log_version": "1.0.0",
+  "script_id": "fixture-sandbox-canary-hit",
+  "started_at": "2026-08-28T10:00:00.000Z",
+  "ended_at": "2026-08-28T10:00:00.100Z",
+  "duration_ms": 100,
+  "timeout": false,
+  "processes": [{ "command": "node", "args": ["script.js"] }],
+  "files": [{ "path": "/home/sandbox/.npmrc", "operation": "read" }],
+  "net": [{ "host": "exfil.sinkhole.test", "port": 443, "protocol": "tcp" }],
+  "canary_hits": [{ "canary_id": "npm_token", "path": "/home/sandbox/.npmrc" }],
+  "error": null
+}

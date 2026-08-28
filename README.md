@@ -36,7 +36,7 @@ SentryHulud's research claim is that a pipeline which **reasons about behavior a
 
 ## Status
 
-**Phase 4 GitHub Action** (classifier-only gate) is in-tree (`action/`, `node action/scan.mjs`). **Next:** [Phase 5 sandbox](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/8). Tracker: [epic #15](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/15).
+**Phase 5 sandbox** (`sandbox/`, `schemas/behavior-log.schema.json`) captures `BehaviorLog` in Docker with canary hits and config **(b)** policy. **Phase 4 GitHub Action** (classifier-only gate) lives in `action/`. **Next:** [Phase 6 LLM + RAG](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/9). Tracker: [epic #15](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/15).
 
 ## Documentation
 

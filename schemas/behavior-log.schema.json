@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sentryhulud.dev/schemas/behavior-log.json",
+  "title": "BehaviorLog",
+  "description": "Sandbox dry-run capture. Emitted only from the isolated container, never from the host runner.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "behavior_log_version",
+    "script_id",
+    "started_at",
+    "ended_at",
+    "duration_ms",
+    "timeout",
+    "processes",
+    "files",
+    "net",
+    "canary_hits"
+  ],
+  "properties": {
+    "behavior_log_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "script_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable id (e.g. script_sha256 or bundle id)"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ended_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "duration_ms": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "timeout": {
+      "type": "boolean",
+      "description": "True when the sandbox cut the run short but still emitted a partial log"
+    },
+    "processes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["command", "args"],
+        "properties": {
+          "command": { "type": "string" },
+          "args": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "operation"],
+        "properties": {
+          "path": { "type": "string" },
+          "operation": {
+            "type": "string",
+            "enum": ["read", "write", "stat", "open"]
+          }
+        }
+      }
+    },
+    "net": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["host", "port", "protocol"],
+        "properties": {
+          "host": { "type": "string" },
+          "port": { "type": "integer", "minimum": 0, "maximum": 65535 },
+          "protocol": { "type": "string", "enum": ["tcp", "udp"] }
+        }
+      }
+    },
+    "canary_hits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["canary_id", "path"],
+        "properties": {
+          "canary_id": { "type": "string" },
+          "path": { "type": "string" }
+        }
+      }
+    },
+    "error": {
+      "type": ["string", "null"],
+      "description": "Non-fatal sandbox error (script throw, hook failure)"
+    }
+  }
+}
