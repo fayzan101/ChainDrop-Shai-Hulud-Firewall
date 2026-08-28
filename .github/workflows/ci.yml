@@ -13,10 +13,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - name: Node fixture, interceptor, and feature tests
+      - name: Node fixture, interceptor, feature, and sandbox tests
         run: |
           npm ci
           npm test
+        env:
+          SENTRYHULUD_DOCKER_INTEGRATION: "1"
 
   python:
     runs-on: ubuntu-latest

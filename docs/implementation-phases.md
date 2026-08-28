@@ -145,6 +145,8 @@ Implemented as `action/scan.mjs` + composite `action/action.yml` (config **a**).
 - Timeout still emits a partial log
 - Docker socket is not mounted
 
+Implemented as `sandbox/` Docker image + `run.mjs` orchestrator + `policy.mjs` (config **b**). `BehaviorLog` schema at `schemas/behavior-log.schema.json`. Fixture: `fixtures/sandbox-canary-hit/`.
+
 ---
 
 ## Phase 6 — LLM, RAG, reasoner (stages 5–7)
