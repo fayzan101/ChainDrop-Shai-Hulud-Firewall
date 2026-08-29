@@ -13,9 +13,10 @@ Thank you for helping build a defensive supply-chain firewall. Read [SECURITY.md
 
 1. Pick an issue from the [phased epic](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/15) (or a `good first issue`).
 2. Branch from `main`: `feat/<area>-<short-name>` or `fix/<area>-<short-name>`.
-3. Keep PRs small. The interceptor, sandbox, and RAG corpus versioning are easy to review in isolation and dangerous to mix.
-4. Update the relevant document under `docs/` in the same PR if behavior or an interface changes.
-5. Add or update tests. Classifier changes need a note on whether they invalidate the held-out split (see [docs/evaluation.md](docs/evaluation.md)).
+3. In the PR body, add **`Closes #<issue>`** (or `Fixes` / `Resolves`). GitHub closes the issue automatically when the PR merges to `main`. CI checks for this keyword; use `[no-issue]` only when there is genuinely no tracker issue.
+4. Keep PRs small. The interceptor, sandbox, and RAG corpus versioning are easy to review in isolation and dangerous to mix.
+5. Update the relevant document under `docs/` in the same PR if behavior or an interface changes.
+6. Add or update tests. Classifier changes need a note on whether they invalidate the held-out split (see [docs/evaluation.md](docs/evaluation.md)).
 
 ## Code conventions
 

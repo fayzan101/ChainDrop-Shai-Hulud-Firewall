@@ -1,3 +1,9 @@
+## Linked issues
+
+Closes #
+
+<!-- GitHub closes linked issues when this PR merges to `main`. Use `Closes`, `Fixes`, or `Resolves` plus the issue number (e.g. `Closes #10`). For work with no tracker issue, write `[no-issue]` on the line above and explain why in Summary. -->
+
 ## Summary
 
 - Explain why this change exists and its user-facing or pipeline impact.

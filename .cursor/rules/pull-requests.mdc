@@ -23,6 +23,9 @@ In parallel: `git status`, `git diff`, `git log`, `git diff main...HEAD`, and wh
 ## Body (required HEREDOC)
 
 ```markdown
+## Linked issues
+- `Closes #<issue>` (or `Fixes` / `Resolves`) — **required** so merge auto-closes the tracker issue. Use `[no-issue]` only for chores with no GitHub issue; explain in Summary.
+
 ## Summary
 - 1–3 bullets on **why** this change exists (user-facing / pipeline stage).
 - Name the implementation phase (0–8) if applicable.

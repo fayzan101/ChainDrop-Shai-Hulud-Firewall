@@ -1,0 +1,29 @@
+name: pr-issue-link
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  require-linked-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify PR body will auto-close an issue on merge
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BODY:-}" ]; then
+            echo "::error::PR body is empty. Add 'Closes #<issue>' under Linked issues."
+            exit 1
+          fi
+          if printf '%s' "$BODY" | grep -qiE '(closes|fixes|resolves) #[0-9]+'; then
+            echo "PR body contains an issue close keyword; merge to main will auto-close it."
+            exit 0
+          fi
+          if printf '%s' "$BODY" | grep -q '\[no-issue\]'; then
+            echo "PR marked [no-issue]; no issue will auto-close on merge."
+            exit 0
+          fi
+          echo "::error::Add 'Closes #<issue>' (or Fixes/Resolves) to the PR body so merging auto-closes the linked issue. For work with no tracker issue, add [no-issue] and explain why in Summary."
+          exit 1
