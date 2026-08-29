@@ -36,7 +36,7 @@ SentryHulud's research claim is that a pipeline which **reasons about behavior a
 
 ## Status
 
-**Phase 5 sandbox** (`sandbox/`, `schemas/behavior-log.schema.json`) captures `BehaviorLog` in Docker with canary hits and config **(b)** policy. **Phase 4 GitHub Action** (classifier-only gate) lives in `action/`. **Next:** [Phase 6 LLM + RAG](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/9). Tracker: [epic #15](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/15).
+**Phase 6 RAG reasoner** (`rag/`, `reasoner/`, `action/scan-rag.mjs`) produces explainable config **(c)** verdicts with `no-chaindrop` corpus pin. **Next:** [Phase 7 API + dashboard](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/10). Tracker: [epic #15](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/15).
 
 ## Documentation
 

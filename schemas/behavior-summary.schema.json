@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sentryhulud.dev/schemas/behavior-summary.json",
+  "title": "BehaviorSummary",
+  "description": "Structured LLM/heuristic summary of script behavior for RAG retrieval.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "behavior_summary_version",
+    "capabilities",
+    "observables",
+    "uncertainty"
+  ],
+  "properties": {
+    "behavior_summary_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "credential_harvest",
+          "republish",
+          "exfil",
+          "persistence",
+          "wiper",
+          "unknown"
+        ]
+      }
+    },
+    "observables": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "domains": { "type": "array", "items": { "type": "string" } },
+        "credential_paths": { "type": "array", "items": { "type": "string" } },
+        "spawned_commands": { "type": "array", "items": { "type": "string" } },
+        "repo_description_patterns": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "uncertainty": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "notes": {
+      "type": ["string", "null"]
+    }
+  }
+}
