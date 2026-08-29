@@ -167,6 +167,8 @@ Implemented as `sandbox/` Docker image + `run.mjs` orchestrator + `policy.mjs` (
 
 Swap Claude vs a local/open model behind the same schema ([ADR 0004](adr/0004-claude-for-verdicts.md)).
 
+Implemented as `rag/` (redact, corpus filter, retrieve, ingest, health) + `reasoner/` (summary, fixture provider, degraded fallback) + `action/scan-rag.mjs` (config **c**). Fixture corpus: `fixtures/rag-corpus/`. Schemas: `schemas/behavior-summary.schema.json`, `schemas/verdict-reasoner.schema.json`.
+
 ---
 
 ## Phase 7 — API, feedback, dashboard (stage 9)

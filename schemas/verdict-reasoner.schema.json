@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sentryhulud.dev/schemas/verdict-reasoner.json",
+  "title": "ReasonerVerdict",
+  "description": "Stage-7 reasoner output before policy merge. See docs/api.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "risk_score",
+    "action",
+    "attack_techniques",
+    "matched_campaigns",
+    "justification",
+    "citations",
+    "uncertainty"
+  ],
+  "properties": {
+    "risk_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "action": {
+      "type": "string",
+      "enum": ["allow", "quarantine", "block"]
+    },
+    "attack_techniques": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "matched_campaigns": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "justification": {
+      "type": "string",
+      "minLength": 1
+    },
+    "citations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["doc_id", "title"],
+        "properties": {
+          "doc_id": { "type": "string" },
+          "title": { "type": "string" },
+          "url": { "type": ["string", "null"] },
+          "date": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "uncertainty": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    }
+  }
+}
