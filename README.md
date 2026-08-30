@@ -36,7 +36,7 @@ SentryHulud's research claim is that a pipeline which **reasons about behavior a
 
 ## Status
 
-**Phase 6 RAG reasoner** (`rag/`, `reasoner/`, `action/scan-rag.mjs`) produces explainable config **(c)** verdicts with `no-chaindrop` corpus pin. **Next:** [Phase 7 API + dashboard](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/10). Tracker: [epic #15](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/15).
+**Phase 7 API + dashboard** (`api/`, `dashboard/`, `action/post-scan.mjs`) persist verdicts and analyst feedback. **Next:** [Phase 8 held-out eval](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/11). Tracker: [epic #15](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/15).
 
 ## Documentation
 

@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sentryhulud.dev/schemas/verdict.json",
+  "title": "Verdict",
+  "description": "Persisted scan verdict stored by the org-mode API. See docs/api.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "verdict_id",
+    "created_at",
+    "repo",
+    "sha",
+    "run_id",
+    "package",
+    "version",
+    "hook",
+    "script_sha256",
+    "risk_score",
+    "action",
+    "attack_techniques",
+    "matched_campaigns",
+    "justification",
+    "citations",
+    "uncertainty",
+    "reasoner_status",
+    "degraded"
+  ],
+  "properties": {
+    "verdict_id": { "type": "string", "minLength": 1 },
+    "created_at": { "type": "string", "format": "date-time" },
+    "repo": { "type": "string", "minLength": 1 },
+    "sha": { "type": "string", "minLength": 1 },
+    "run_id": { "type": "string", "minLength": 1 },
+    "package": { "type": "string", "minLength": 1 },
+    "version": { "type": "string", "minLength": 1 },
+    "hook": {
+      "type": "string",
+      "enum": ["preinstall", "install", "postinstall"]
+    },
+    "script_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "risk_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "action": {
+      "type": "string",
+      "enum": ["allow", "quarantine", "block"]
+    },
+    "attack_techniques": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "matched_campaigns": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "justification": { "type": "string", "minLength": 1 },
+    "citations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["doc_id", "title"],
+        "properties": {
+          "doc_id": { "type": "string" },
+          "title": { "type": "string" },
+          "url": { "type": ["string", "null"] },
+          "date": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "uncertainty": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "reasoner_status": {
+      "type": "string",
+      "enum": ["ok", "degraded", "skipped"]
+    },
+    "model_version": { "type": ["string", "null"] },
+    "feature_schema_version": { "type": ["string", "null"] },
+    "corpus_version": { "type": ["string", "null"] },
+    "prompt_version": { "type": ["string", "null"] },
+    "classifier_label": { "type": ["string", "null"] },
+    "sandbox": { "type": ["object", "null"] },
+    "degraded": { "type": "boolean" },
+    "split": {
+      "type": ["string", "null"],
+      "enum": ["train", "val", "heldout", null]
+    },
+    "feedback": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["label", "analyst", "created_at"],
+      "properties": {
+        "label": {
+          "type": "string",
+          "enum": ["confirm-malicious", "false-positive", "needs-more-data"]
+        },
+        "comment": { "type": ["string", "null"] },
+        "analyst": { "type": "string", "minLength": 1 },
+        "created_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

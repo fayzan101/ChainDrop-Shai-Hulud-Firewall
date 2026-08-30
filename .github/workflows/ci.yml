@@ -32,3 +32,29 @@ jobs:
           python -m pip install pytest numpy scikit-learn joblib
           PYTHONPATH=. python -m pytest classifier/tests rag/tests reasoner/tests eval/tests -q
           PYTHONPATH=. python -m classifier.train
+
+  api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: API tests
+        run: |
+          cd api
+          npm ci
+          npm test
+
+  dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Dashboard build
+        run: |
+          cd dashboard
+          npm ci
+          npm run build
