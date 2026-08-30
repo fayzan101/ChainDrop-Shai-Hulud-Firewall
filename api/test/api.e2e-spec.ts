@@ -3,6 +3,7 @@ import { Test } from "@nestjs/testing";
 import request from "supertest";
 import { AppModule } from "../src/app.module";
 import { createApp } from "../src/main";
+import { setupSwagger } from "../src/swagger";
 
 describe("API (e2e)", () => {
   let app: INestApplication;
@@ -22,6 +23,7 @@ describe("API (e2e)", () => {
         transform: true,
       }),
     );
+    setupSwagger(app);
     await app.init();
   });
 
@@ -212,6 +214,15 @@ describe("API (e2e)", () => {
         analyst: "bob",
       })
       .expect(400);
+  });
+
+  it("serves OpenAPI JSON at /docs/openapi.json", async () => {
+    const response = await request(app.getHttpServer())
+      .get("/docs/openapi.json")
+      .expect(200);
+    expect(response.body.openapi).toBe("3.0.0");
+    expect(response.body.paths["/v1/scans"]).toBeDefined();
+    expect(response.body.paths["/v1/verdicts"]).toBeDefined();
   });
 });
 

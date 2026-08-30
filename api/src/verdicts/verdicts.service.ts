@@ -5,7 +5,7 @@ import {
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { FeedbackDto } from "../dto/api.dto";
+import { FeedbackDto, VerdictListQueryDto } from "../dto/api.dto";
 import { FeedbackEntity } from "../entities/feedback.entity";
 import { VerdictEntity } from "../entities/verdict.entity";
 import { serializeFeedback, serializeVerdict } from "../serialization";
@@ -21,7 +21,7 @@ export class VerdictsService {
     private readonly feedback: Repository<FeedbackEntity>,
   ) {}
 
-  async list(query: Record<string, string | undefined>) {
+  async list(query: VerdictListQueryDto) {
     const qb = this.verdicts
       .createQueryBuilder("verdict")
       .leftJoinAndSelect("verdict.feedback", "feedback")

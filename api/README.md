@@ -15,6 +15,22 @@ PostgreSQL: set `DATABASE_URL=postgresql://…` instead of `SQLITE_PATH`.
 
 Optional auth: `SENTRYHULUD_API_TOKEN` (bearer token on `Authorization` header).
 
+## OpenAPI / Swagger
+
+With the API running:
+
+- **Swagger UI:** http://127.0.0.1:3001/docs
+- **OpenAPI JSON:** http://127.0.0.1:3001/docs/openapi.json
+- **OpenAPI YAML:** http://127.0.0.1:3001/docs/openapi.yaml
+
+Export committed specs to the repo root:
+
+```bash
+npm run openapi:export
+```
+
+Writes `docs/openapi.yaml` and `docs/openapi.json`.
+
 ## Endpoints
 
 - `POST /v1/scans` — ingest scan verdicts from the Action (`action/post-scan.mjs`)

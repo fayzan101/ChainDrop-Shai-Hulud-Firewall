@@ -1,6 +1,7 @@
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
+import { setupSwagger } from "./swagger";
 
 export async function createApp() {
   const app = await NestFactory.create(AppModule, { logger: false });
@@ -12,6 +13,7 @@ export async function createApp() {
       transform: true,
     }),
   );
+  setupSwagger(app);
   return app;
 }
 

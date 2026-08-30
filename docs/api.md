@@ -48,9 +48,19 @@ Produced by stage 7 and stored as-is (plus server fields).
 }
 ```
 
-JSON Schema (draft 2020-12) will live at `docs/schemas/verdict.schema.json` when code lands. Until then this object is the contract.
+JSON Schema: [`schemas/verdict.schema.json`](../schemas/verdict.schema.json). OpenAPI 3 spec: [`docs/openapi.yaml`](openapi.yaml) (Swagger UI at `/docs` when the API is running).
 
 `reasoner_status`: `ok` | `degraded` | `skipped`.
+
+## OpenAPI
+
+| Artifact | Location |
+| --- | --- |
+| Swagger UI | `GET /docs` (not under `/v1`) |
+| OpenAPI JSON | `GET /docs/openapi.json` |
+| Committed YAML | [`docs/openapi.yaml`](openapi.yaml) |
+
+Regenerate after API changes: `cd api && npm run openapi:export`.
 
 ## Endpoints
 

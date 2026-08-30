@@ -1,9 +1,18 @@
 import { Controller, Get, UseGuards } from "@nestjs/common";
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from "@nestjs/swagger";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { BearerAuthGuard } from "../auth/bearer-auth.guard";
+import { MetricsResponseDto } from "../dto/response.dto";
 import { VerdictEntity } from "../entities/verdict.entity";
 
+@ApiTags("metrics")
+@ApiBearerAuth("bearer")
 @Controller("metrics")
 @UseGuards(BearerAuthGuard)
 export class MetricsController {
@@ -13,6 +22,11 @@ export class MetricsController {
   ) {}
 
   @Get()
+  @ApiOperation({
+    summary: "Dashboard scan counters",
+    description: "Prometheus scrape at `/metrics` is preferred for production ops.",
+  })
+  @ApiOkResponse({ type: MetricsResponseDto })
   async summary() {
     const rows = await this.verdicts.find();
     const total = rows.length;
