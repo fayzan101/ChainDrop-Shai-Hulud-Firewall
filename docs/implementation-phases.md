@@ -184,6 +184,8 @@ Implemented as `rag/` (redact, corpus filter, retrieve, ingest, health) + `reaso
 - Action can POST a scan and the UI shows the justification
 - Override is stored with analyst id and timestamp
 
+Implemented as `api/` (NestJS + SQLite dev / PostgreSQL prod) and `dashboard/` (Next.js analyst queue). `action/post-scan.mjs` ingests local `sentryhulud-verdict.json` via `POST /v1/scans`. Schema: `schemas/verdict.schema.json`.
+
 ---
 
 ## Phase 8 — Held-out evaluation

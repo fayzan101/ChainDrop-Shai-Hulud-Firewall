@@ -1,0 +1,688 @@
+openapi: 3.0.0
+paths:
+  /v1/scans:
+    post:
+      description: Idempotent on `(run_id, lockfile_digest)`. Ingest per-script
+        verdicts produced by config (a) or (c).
+      operationId: ScansController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateScanDto"
+      responses:
+        "201":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateScanResponseDto"
+      security: &a1
+        - bearer: []
+      summary: Record a scan from the Action
+      tags: &a2
+        - scans
+  /v1/scans/{scan_id}:
+    get:
+      operationId: ScansController_findOne
+      parameters:
+        - name: scan_id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanDetailResponseDto"
+        "404":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseDto"
+      security: *a1
+      summary: Fetch a scan with all verdicts
+      tags: *a2
+  /v1/verdicts:
+    get:
+      description: Quarantine and block rows are sorted ahead of allow.
+      operationId: VerdictsController_list
+      parameters:
+        - name: action
+          required: false
+          in: query
+          schema:
+            enum:
+              - allow
+              - quarantine
+              - block
+            type: string
+        - name: repo
+          required: false
+          in: query
+          schema:
+            example: acme/app
+            type: string
+        - name: campaign
+          required: false
+          in: query
+          schema:
+            example: shai-hulud
+            type: string
+        - name: from
+          required: false
+          in: query
+          schema:
+            example: 2026-08-01T00:00:00Z
+            type: string
+        - name: to
+          required: false
+          in: query
+          schema:
+            example: 2026-08-31T23:59:59Z
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Pagination cursor (reserved).
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerdictListResponseDto"
+      security: &a3
+        - bearer: []
+      summary: List verdicts for the analyst queue
+      tags: &a4
+        - verdicts
+  /v1/verdicts/{verdict_id}:
+    get:
+      operationId: VerdictsController_findOne
+      parameters:
+        - name: verdict_id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerdictResponseDto"
+        "404":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseDto"
+      security: *a3
+      summary: Fetch a single verdict
+      tags: *a4
+  /v1/verdicts/{verdict_id}/feedback:
+    post:
+      description: Feedback must not change `split=heldout`. False-positive labels are
+        rejected for held-out rows.
+      operationId: VerdictsController_addFeedback
+      parameters:
+        - name: verdict_id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedbackDto"
+      responses:
+        "201":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedbackResultDto"
+        "400":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseDto"
+        "404":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseDto"
+      security: *a3
+      summary: Record analyst feedback
+      tags: *a4
+  /v1/corpus/health:
+    get:
+      description: Evaluation CI asserts `chaindrop_documents === 0` for no-chaindrop.
+      operationId: CorpusController_health
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CorpusHealthResponseDto"
+      security:
+        - bearer: []
+      summary: Report RAG corpus pin health
+      tags:
+        - corpus
+  /v1/metrics:
+    get:
+      description: Prometheus scrape at `/metrics` is preferred for production ops.
+      operationId: MetricsController_summary
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetricsResponseDto"
+      security:
+        - bearer: []
+      summary: Dashboard scan counters
+      tags:
+        - metrics
+info:
+  title: SentryHulud API
+  description: "Org-mode verdict store for CI scan ingest, analyst queue, and
+    feedback. Base path: `/v1`. See docs/api.md for privacy and error
+    semantics."
+  version: 1.0.0
+  contact: {}
+tags:
+  - name: scans
+    description: Record scans from the GitHub Action
+  - name: verdicts
+    description: Analyst queue and feedback
+  - name: corpus
+    description: RAG corpus health
+  - name: metrics
+    description: Dashboard counters
+servers: []
+components:
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: token
+      type: http
+      description: Set `SENTRYHULUD_API_TOKEN` on the server. Omit when the token is
+        unset (local dev).
+  schemas:
+    CitationDto:
+      type: object
+      properties:
+        doc_id:
+          type: string
+          example: ti-shulud2-001
+        title:
+          type: string
+          example: Shai-Hulud 2.0 credential theft
+        url:
+          type: object
+          example: https://securitylabs.datadoghq.com/articles/shai-hulud-2.0-npm-worm/
+          nullable: true
+        date:
+          type: object
+          example: 2025-11-24
+          nullable: true
+      required:
+        - doc_id
+        - title
+    VerdictInputDto:
+      type: object
+      properties:
+        repo:
+          type: string
+          example: acme/app
+        sha:
+          type: string
+          example: abc123def456
+        run_id:
+          type: string
+          example: "12345678901"
+        package:
+          type: string
+          example: "@scope/name"
+        version:
+          type: string
+          example: 1.2.3
+        hook:
+          type: string
+          enum:
+            - preinstall
+            - install
+            - postinstall
+        script_sha256:
+          type: string
+          example: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          description: SHA-256 of captured script bytes (hex).
+        risk_score:
+          type: number
+          minimum: 0
+          maximum: 100
+          example: 87
+        action:
+          type: string
+          enum:
+            - allow
+            - quarantine
+            - block
+        attack_techniques:
+          example:
+            - T1195.002
+            - T1528
+          type: array
+          items:
+            type: string
+        matched_campaigns:
+          example:
+            - shai-hulud-2.0
+          type: array
+          items:
+            type: string
+        justification:
+          type: string
+          example: Behavior summary matches documented preinstall loader and credential
+            harvest.
+        citations:
+          type: array
+          items:
+            $ref: "#/components/schemas/CitationDto"
+        uncertainty:
+          type: string
+          enum:
+            - low
+            - medium
+            - high
+        reasoner_status:
+          type: string
+          enum:
+            - ok
+            - degraded
+            - skipped
+        model_version:
+          type: object
+          example: features-heuristic-0.1.0
+          nullable: true
+        feature_schema_version:
+          type: object
+          example: 1.0.0
+          nullable: true
+        corpus_version:
+          type: object
+          example: no-chaindrop
+          nullable: true
+        prompt_version:
+          type: object
+          example: verdict-fixture-0.1.0
+          nullable: true
+        classifier_label:
+          type: string
+          enum:
+            - benign
+            - suspicious
+            - escalate
+          nullable: true
+        sandbox:
+          type: object
+          example:
+            timeout: false
+            canary_hits:
+              - npm_token
+            egress_count: 3
+          nullable: true
+        degraded:
+          type: boolean
+          example: false
+        split:
+          type: string
+          enum:
+            - train
+            - val
+            - heldout
+          nullable: true
+          description: Dataset split; held-out rows must not be relabeled via UI.
+      required:
+        - repo
+        - sha
+        - run_id
+        - package
+        - version
+        - hook
+        - script_sha256
+        - risk_score
+        - action
+        - attack_techniques
+        - matched_campaigns
+        - justification
+        - citations
+        - uncertainty
+        - reasoner_status
+        - degraded
+    CreateScanDto:
+      type: object
+      properties:
+        repo:
+          type: string
+          example: acme/app
+        sha:
+          type: string
+          example: abc123def456
+        run_id:
+          type: string
+          example: "12345678901"
+        lockfile_digest:
+          type: string
+          example: package-lock.json
+          description: Lockfile path or digest for idempotency with run_id.
+        split:
+          type: string
+          enum:
+            - train
+            - val
+            - heldout
+          nullable: true
+        scan_payload:
+          type: object
+          description: Raw scan output from action/scan.mjs or scan-rag.mjs.
+        verdicts:
+          type: array
+          items:
+            $ref: "#/components/schemas/VerdictInputDto"
+      required:
+        - repo
+        - sha
+        - run_id
+        - lockfile_digest
+        - verdicts
+    FeedbackResponseDto:
+      type: object
+      properties:
+        label:
+          type: string
+          enum:
+            - confirm-malicious
+            - false-positive
+            - needs-more-data
+        comment:
+          type: object
+          nullable: true
+        analyst:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - label
+        - analyst
+        - created_at
+    VerdictResponseDto:
+      type: object
+      properties:
+        verdict_id:
+          type: string
+          example: 01JABCDEFGHJKMNPQRSTVWXYZ0
+        created_at:
+          type: string
+          format: date-time
+        repo:
+          type: string
+        sha:
+          type: string
+        run_id:
+          type: string
+        package:
+          type: string
+        version:
+          type: string
+        hook:
+          type: string
+        script_sha256:
+          type: string
+        risk_score:
+          type: number
+        action:
+          type: string
+          enum:
+            - allow
+            - quarantine
+            - block
+        attack_techniques:
+          type: array
+          items:
+            type: string
+        matched_campaigns:
+          type: array
+          items:
+            type: string
+        justification:
+          type: string
+        citations:
+          type: array
+          items:
+            $ref: "#/components/schemas/CitationDto"
+        uncertainty:
+          type: string
+        reasoner_status:
+          type: string
+          enum:
+            - ok
+            - degraded
+            - skipped
+        model_version:
+          type: object
+          nullable: true
+        feature_schema_version:
+          type: object
+          nullable: true
+        corpus_version:
+          type: object
+          nullable: true
+        prompt_version:
+          type: object
+          nullable: true
+        classifier_label:
+          type: object
+          nullable: true
+        sandbox:
+          type: object
+          nullable: true
+        degraded:
+          type: boolean
+        split:
+          type: string
+          enum:
+            - train
+            - val
+            - heldout
+          nullable: true
+        feedback:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/FeedbackResponseDto"
+      required:
+        - verdict_id
+        - created_at
+        - repo
+        - sha
+        - run_id
+        - package
+        - version
+        - hook
+        - script_sha256
+        - risk_score
+        - action
+        - attack_techniques
+        - matched_campaigns
+        - justification
+        - citations
+        - uncertainty
+        - reasoner_status
+        - degraded
+    CreateScanResponseDto:
+      type: object
+      properties:
+        scan_id:
+          type: string
+          format: uuid
+        verdicts:
+          type: array
+          items:
+            $ref: "#/components/schemas/VerdictResponseDto"
+        idempotent:
+          type: boolean
+          description: True when an existing scan was returned for run_id + lockfile_digest.
+      required:
+        - scan_id
+        - verdicts
+    ScanDetailResponseDto:
+      type: object
+      properties:
+        scan_id:
+          type: string
+          format: uuid
+        repo:
+          type: string
+        sha:
+          type: string
+        run_id:
+          type: string
+        lockfile_digest:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        verdicts:
+          type: array
+          items:
+            $ref: "#/components/schemas/VerdictResponseDto"
+      required:
+        - scan_id
+        - repo
+        - sha
+        - run_id
+        - lockfile_digest
+        - created_at
+        - verdicts
+    ErrorResponseDto:
+      type: object
+      properties:
+        statusCode:
+          type: number
+        message:
+          type: object
+        error:
+          type: string
+      required:
+        - statusCode
+        - message
+        - error
+    VerdictListResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/VerdictResponseDto"
+        next_cursor:
+          type: object
+          nullable: true
+      required:
+        - items
+    FeedbackDto:
+      type: object
+      properties:
+        label:
+          type: string
+          enum:
+            - confirm-malicious
+            - false-positive
+            - needs-more-data
+        comment:
+          type: string
+          example: Legitimate esbuild download pattern.
+        analyst:
+          type: string
+          example: alice
+      required:
+        - label
+        - analyst
+    FeedbackResultDto:
+      type: object
+      properties:
+        verdict:
+          $ref: "#/components/schemas/VerdictResponseDto"
+        feedback:
+          $ref: "#/components/schemas/FeedbackResponseDto"
+        heldout_split_preserved:
+          type: boolean
+          description: True when the verdict split was heldout and remained unchanged.
+      required:
+        - verdict
+        - feedback
+        - heldout_split_preserved
+    CorpusHealthResponseDto:
+      type: object
+      properties:
+        corpus_version:
+          type: string
+          example: no-chaindrop
+        document_count:
+          type: number
+          example: 4
+        chaindrop_documents:
+          type: number
+          example: 0
+          description: Must be 0 for the evaluation corpus pin.
+        embedded_at:
+          type: string
+          format: date-time
+        degraded:
+          type: boolean
+          description: Present when Python rag.health is unavailable.
+      required:
+        - corpus_version
+        - document_count
+        - chaindrop_documents
+        - embedded_at
+    MetricsResponseDto:
+      type: object
+      properties:
+        scans_total:
+          type: number
+        blocks_total:
+          type: number
+        quarantines_total:
+          type: number
+        escalations_total:
+          type: number
+        block_rate:
+          type: number
+          description: blocks_total / scans_total
+      required:
+        - scans_total
+        - blocks_total
+        - quarantines_total
+        - escalations_total
+        - block_rate

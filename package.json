@@ -8,7 +8,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "test": "node --test schemas/script-bundle.test.mjs schemas/behavior-log.test.mjs fixtures/fixtures.test.mjs interceptor/extract.test.mjs interceptor/no-execute.test.mjs classifier/features.test.mjs action/scan.test.mjs action/scan-rag.test.mjs sandbox/policy.test.mjs sandbox/run.test.mjs",
+    "test": "node --test schemas/script-bundle.test.mjs schemas/behavior-log.test.mjs fixtures/fixtures.test.mjs interceptor/extract.test.mjs interceptor/no-execute.test.mjs classifier/features.test.mjs action/scan.test.mjs action/scan-rag.test.mjs action/scan-ingest.test.mjs sandbox/policy.test.mjs sandbox/run.test.mjs",
     "intercept": "node interceptor/cli.mjs",
     "scan": "node action/scan.mjs",
     "scan:rag": "node action/scan-rag.mjs",
