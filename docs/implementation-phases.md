@@ -201,6 +201,8 @@ Implemented as `api/` (NestJS + SQLite dev / PostgreSQL prod) and `dashboard/` (
 
 - One results table and commit hash of the frozen pins exist for the final report
 
+Implemented as `eval/run_heldout.py` with synthetic held-out rows until `data/scripts/metadata.jsonl` is populated. Writes `eval/results/heldout-results.json` and `.md` with frozen pins (git commit, corpus pin, thresholds).
+
 ---
 
 ## What to implement first (this week)

@@ -36,7 +36,7 @@ SentryHulud's research claim is that a pipeline which **reasons about behavior a
 
 ## Status
 
-**Phase 7 API + dashboard** (`api/`, `dashboard/`, `action/post-scan.mjs`) persist verdicts and analyst feedback. **Next:** [Phase 8 held-out eval](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/11). Tracker: [epic #15](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/15).
+**Phase 8 held-out eval** (`eval/run_heldout.py`) ablates configs **(a)(b)(c)** on synthetic held-out ChainDrop rows. Tracker: [epic #15](https://github.com/fayzan101/ChainDrop-Shai-Hulud-Firewall/issues/15).
 
 ## Documentation
 
