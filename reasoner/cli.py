@@ -13,6 +13,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run RAG reasoner pipeline")
     parser.add_argument("--documents", required=True)
     parser.add_argument("--corpus-version", default="no-chaindrop")
+    parser.add_argument(
+        "--provider",
+        default=None,
+        help="fixture|claude (default: REASONER_PROVIDER env or fixture)",
+    )
     args = parser.parse_args()
 
     payload = json.load(sys.stdin)
@@ -23,6 +28,7 @@ def main() -> None:
         classifier_risk=int(payload.get("classifier_risk") or 0),
         documents_path=args.documents,
         corpus_version=args.corpus_version,
+        provider_name=args.provider,
     )
     sys.stdout.write(f"{json.dumps(result)}\n")
 
