@@ -1,8 +1,12 @@
 name: SentryHulud
-description: Lifecycle-script firewall for npm CI (Phase 4 classifier-only gate). Never executes install hooks.
+description: Lifecycle-script firewall for npm CI. Configs (a) classifier, (b) sandbox, (c) RAG. Never executes install hooks on the host.
 author: SentryHulud
 
 inputs:
+  config:
+    description: Evaluation configuration — a (classifier), b (sandbox), or c (rag)
+    required: false
+    default: "a"
   working-directory:
     description: Project directory containing the lockfile
     required: false
@@ -27,6 +31,14 @@ inputs:
     description: Optional explicit lockfile path
     required: false
     default: ""
+  corpus-version:
+    description: RAG corpus pin for config (c)
+    required: false
+    default: "no-chaindrop"
+  sandbox:
+    description: Enable sandbox dry-run for config (b)
+    required: false
+    default: "true"
 
 outputs:
   action:
@@ -41,6 +53,12 @@ outputs:
   degraded:
     description: true if fail-open recovered from an error
     value: ${{ steps.scan.outputs.degraded }}
+  config:
+    description: Evaluation configuration that ran (a|b|c)
+    value: ${{ steps.scan.outputs.config }}
+  reasoner_status:
+    description: ok | degraded | skipped (config c only)
+    value: ${{ steps.scan.outputs.reasoner_status }}
 
 runs:
   using: composite
@@ -50,20 +68,54 @@ runs:
       with:
         node-version: "20"
 
+    - name: Setup Python for config (c)
+      if: inputs.config == 'c'
+      shell: bash
+      run: python -m pip install --quiet numpy
+
     - name: Install Action dependencies
       shell: bash
       working-directory: ${{ github.action_path }}/..
       run: npm ci
 
-    - name: Scan lifecycle scripts (no execute)
+    - name: Build sandbox image for config (b)
+      if: inputs.config == 'b' && inputs.sandbox == 'true'
+      shell: bash
+      working-directory: ${{ github.action_path }}/..
+      run: docker build -t sentryhulud-sandbox:dev sandbox/
+
+    - name: Scan lifecycle scripts (no host execute)
       id: scan
       shell: bash
       working-directory: ${{ github.workspace }}
+      env:
+        PYTHONPATH: ${{ github.action_path }}/..
       run: |
         set -euo pipefail
         ROOT="${{ github.action_path }}/.."
+        CONFIG="${{ inputs.config }}"
         ARGS=(--dir "${{ inputs.working-directory }}" --out "${{ inputs.verdict-path }}" --fail-open "${{ inputs.fail-open }}" --threshold-quarantine "${{ inputs.threshold-quarantine }}" --threshold-block "${{ inputs.threshold-block }}" --github-output)
         if [ -n "${{ inputs.lockfile }}" ]; then
           ARGS+=(--lockfile "${{ inputs.lockfile }}")
         fi
-        node "$ROOT/action/scan.mjs" "${ARGS[@]}"
+        case "$CONFIG" in
+          a)
+            node "$ROOT/action/scan.mjs" "${ARGS[@]}"
+            ;;
+          b)
+            if [ "${{ inputs.sandbox }}" = "true" ]; then
+              ARGS+=(--build-sandbox-image)
+            else
+              ARGS+=(--no-sandbox)
+            fi
+            node "$ROOT/action/scan-sandbox.mjs" "${ARGS[@]}"
+            ;;
+          c)
+            ARGS+=(--corpus-version "${{ inputs.corpus-version }}")
+            node "$ROOT/action/scan-rag.mjs" "${ARGS[@]}"
+            ;;
+          *)
+            echo "unknown config: $CONFIG (expected a, b, or c)"
+            exit 1
+            ;;
+        esac

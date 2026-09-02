@@ -38,9 +38,15 @@ jobs:
         if: success()
 ```
 
-Local equivalent: `node action/scan.mjs --dir . --out sentryhulud-verdict.json`.
+Local equivalent:
 
-Phase 4 ships **classifier-only** (evaluation config **a**): interceptor + static features + policy. `sandbox` / `rag` inputs from the full contract remain deferred to Phases 5–6.
+```bash
+node action/scan.mjs --dir . --out sentryhulud-verdict.json          # config (a)
+node action/scan-sandbox.mjs --dir . --out sentryhulud-verdict.json  # config (b)
+node action/scan-rag.mjs --dir . --out sentryhulud-verdict.json      # config (c)
+```
+
+The composite Action selects the scan via the `config` input (`a` | `b` | `c`). Config **(b)** builds the sandbox image when Docker is available; config **(c)** runs the fixture reasoner with `corpus-version: no-chaindrop`.
 
 Until the Action is published under a release tag, pin a commit SHA as above.
 
@@ -49,16 +55,16 @@ Until the Action is published under a release tag, pin a commit SHA as above.
 
 | Input | Required | Default | Description |
 | --- | --- | --- | --- |
+| `config` | no | `a` | `a` (classifier) \| `b` (sandbox) \| `c` (rag) |
 | `package-manager` | no | `npm` | `npm` \| `yarn` \| `pnpm` |
 | `lockfile` | no | auto-detect | Path to lockfile |
 | `api-url` | no | empty | If empty, run classifier locally and skip org persistence |
 | `api-token` | no | empty | Auth to NestJS API |
-| `corpus-version` | no | `production` | Vector index pin |
+| `corpus-version` | no | `no-chaindrop` | RAG corpus pin for config **(c)** |
 | `threshold-quarantine` | no | `40` | Inclusive lower bound |
 | `threshold-block` | no | `80` | Exclusive of quarantine band; scores `>` this block |
 | `fail-open` | no | `false` | If true, interceptor errors warn only (not recommended) |
-| `sandbox` | no | `true` | If false, configuration (a) only — research/debug |
-| `rag` | no | `true` | If false with sandbox true, configuration (b) |
+| `sandbox` | no | `true` | Sandbox dry-run for config **(b)** |
 | `working-directory` | no | `.` | Monorepo package path |
 
 Exact bound inclusivity must match [srs.md](srs.md): `< 40` allow, `40–80` quarantine, `> 80` block.
