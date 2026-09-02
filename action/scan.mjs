@@ -12,6 +12,7 @@ import {
   InterceptorError,
 } from "../interceptor/extract.mjs";
 import { decideAction, riskFromFeatures } from "./policy.mjs";
+import { writeGithubOutput } from "./github-output.mjs";
 
 const ACTION_ROOT = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(ACTION_ROOT, "..");
@@ -148,20 +149,6 @@ function parseArgs(argv) {
     else if (a === "--github-output") opts.githubOutput = true;
   }
   return opts;
-}
-
-function writeGithubOutput(verdict) {
-  const outFile = process.env.GITHUB_OUTPUT;
-  if (!outFile) {
-    return;
-  }
-  const lines = [
-    `action=${verdict.action}`,
-    `risk_score=${verdict.risk_score}`,
-    `verdict_path=${verdict.verdict_path}`,
-    `degraded=${verdict.degraded ? "true" : "false"}`,
-  ];
-  writeFileSync(outFile, `${lines.join("\n")}\n`, { flag: "a" });
 }
 
 export function run(argv, io = { stdout: process.stdout, stderr: process.stderr }) {

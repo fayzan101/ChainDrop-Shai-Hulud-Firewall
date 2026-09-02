@@ -1,0 +1,97 @@
+name: sentryhulud-ablation
+
+# Matrix configs (a)(b)(c) on the same benign / suspicious fixture pair.
+on:
+  pull_request:
+    paths:
+      - "action/**"
+      - "sandbox/**"
+      - "rag/**"
+      - "reasoner/**"
+      - ".github/workflows/sentryhulud-ablation.yml"
+  push:
+    branches: [main]
+    paths:
+      - "action/**"
+      - "sandbox/**"
+      - "rag/**"
+      - "reasoner/**"
+      - ".github/workflows/sentryhulud-ablation.yml"
+
+jobs:
+  ablation:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [a, b, c]
+        fixture: [benign-lockfile, synthetic-suspicious]
+        include:
+          - config: a
+            fixture: benign-lockfile
+            expect_outcome: success
+            expect_action: allow
+          - config: a
+            fixture: synthetic-suspicious
+            expect_outcome: failure
+            expect_action: block
+          - config: b
+            fixture: benign-lockfile
+            expect_outcome: success
+            expect_action: allow
+          - config: b
+            fixture: synthetic-suspicious
+            expect_outcome: failure
+            expect_action: block
+          - config: c
+            fixture: benign-lockfile
+            expect_outcome: success
+            expect_action: allow
+          - config: c
+            fixture: synthetic-suspicious
+            expect_outcome: failure
+            expect_action: block
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./action
+        id: scan
+        continue-on-error: true
+        with:
+          config: ${{ matrix.config }}
+          working-directory: fixtures/${{ matrix.fixture }}
+          verdict-path: verdict-${{ matrix.config }}-${{ matrix.fixture }}.json
+          corpus-version: no-chaindrop
+          sandbox: "true"
+
+      - name: Assert expected Action outcome
+        run: |
+          if [ "${{ steps.scan.outcome }}" != "${{ matrix.expect_outcome }}" ]; then
+            echo "config=${{ matrix.config }} fixture=${{ matrix.fixture }} expected ${{ matrix.expect_outcome }}, got ${{ steps.scan.outcome }}"
+            exit 1
+          fi
+          test -f "verdict-${{ matrix.config }}-${{ matrix.fixture }}.json"
+          python - <<'PY'
+          import json, os, sys
+          path = f"verdict-{os.environ['MATRIX_CONFIG']}-{os.environ['MATRIX_FIXTURE']}.json"
+          v = json.load(open(path))
+          assert v["config"] == os.environ["MATRIX_CONFIG"], v
+          assert v["action"] == os.environ["EXPECT_ACTION"], v
+          if os.environ["MATRIX_CONFIG"] == "c" and os.environ["EXPECT_ACTION"] == "block":
+              assert v.get("reasoner_status") == "ok", v
+              assert len(v.get("citations") or []) >= 1, v
+          if os.environ["MATRIX_CONFIG"] == "b" and os.environ["EXPECT_ACTION"] == "block":
+              assert "behavior_log" in v, v
+          PY
+        env:
+          MATRIX_CONFIG: ${{ matrix.config }}
+          MATRIX_FIXTURE: ${{ matrix.fixture }}
+          EXPECT_ACTION: ${{ matrix.expect_action }}
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: verdict-${{ matrix.config }}-${{ matrix.fixture }}
+          path: verdict-${{ matrix.config }}-${{ matrix.fixture }}.json
