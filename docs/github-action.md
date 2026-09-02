@@ -46,7 +46,7 @@ node action/scan-sandbox.mjs --dir . --out sentryhulud-verdict.json  # config (b
 node action/scan-rag.mjs --dir . --out sentryhulud-verdict.json      # config (c)
 ```
 
-The composite Action selects the scan via the `config` input (`a` | `b` | `c`). Config **(b)** builds the sandbox image when Docker is available; config **(c)** runs the fixture reasoner with `corpus-version: no-chaindrop`.
+The composite Action selects the scan via the `config` input (`a` | `b` | `c`). Config **(a)** and **(b)** load `classifier/artifacts/triage.joblib` when present (trained on first Action run); otherwise they fall back to Phase-2 heuristic scoring. Config **(b)** builds the sandbox image when Docker is available; config **(c)** runs the fixture reasoner with `corpus-version: no-chaindrop`.
 
 Until the Action is published under a release tag, pin a commit SHA as above.
 

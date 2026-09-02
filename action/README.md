@@ -4,9 +4,9 @@ Lifecycle-script firewall for npm CI. Evaluation configurations:
 
 | `config` | Pipeline |
 | --- | --- |
-| `a` (default) | Classifier-only — intercept → static features → policy |
-| `b` | Classifier + sandbox dry-run → `BehaviorLog` heuristics |
-| `c` | Classifier + sandbox + RAG reasoner (`corpus-version: no-chaindrop`) |
+| `a` (default) | Classifier-only — intercept → ML triage (or heuristic fallback) → policy |
+| `b` | ML triage + sandbox dry-run → `BehaviorLog` heuristics |
+| `c` | ML triage + sandbox + RAG reasoner (`corpus-version: no-chaindrop`) |
 
 **Does not execute** `preinstall` / `install` / `postinstall` on the host.
 
@@ -26,11 +26,12 @@ Pin to a commit SHA (not `main`):
     verdict-path: sentryhulud-verdict.json
 ```
 
-Config **(b)** requires Docker on the runner. Config **(c)** requires Python 3.11+ (the Action installs `numpy` for the reasoner path).
+Config **(b)** requires Docker on the runner. All configs train/load `classifier/artifacts/triage.joblib` when Python is available; without the artifact, scans fall back to Phase-2 heuristic scoring (`features-heuristic-0.1.0`).
 
 ## Local CLI
 
 ```bash
+python -m classifier.train   # once, writes classifier/artifacts/triage.joblib
 node action/scan.mjs --dir fixtures/benign-lockfile
 node action/scan-sandbox.mjs --dir fixtures/synthetic-suspicious --no-sandbox
 node action/scan-rag.mjs --dir fixtures/synthetic-suspicious
