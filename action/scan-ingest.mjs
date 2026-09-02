@@ -35,7 +35,8 @@ export function scanResultToIngestPayload(scan, meta) {
  * @param {object} meta
  */
 function mapScriptVerdict(scan, script, meta) {
-  const classifierLabel = inferClassifierLabel(script);
+  const classifierLabel =
+    script.classifier_label ?? inferClassifierLabel(script);
   return {
     repo: meta.repo,
     sha: meta.sha,

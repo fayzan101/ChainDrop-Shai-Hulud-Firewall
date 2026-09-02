@@ -18,8 +18,12 @@ import {
   runInSandbox,
 } from "../sandbox/run.mjs";
 import { writeGithubOutput } from "./github-output.mjs";
-import { decideAction, riskFromFeatures } from "./policy.mjs";
+import { decideAction } from "./policy.mjs";
 import { sourceForBundle } from "./scan.mjs";
+import {
+  HEURISTIC_MODEL_VERSION,
+  triageFeaturesBatch,
+} from "./triage.mjs";
 
 const ACTION_ROOT = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(ACTION_ROOT, "..");
@@ -68,11 +72,29 @@ export async function scanProjectSandbox(opts) {
       lockfile: opts.lockfile ? resolve(opts.lockfile) : undefined,
     });
 
-    const scriptVerdicts = extracted.bundles.map((bundle) => {
+    const featureRows = extracted.bundles.map((bundle) => {
       const source = sourceForBundle(dir, bundle);
       const features = extractFeatures({ hook: bundle.hook, source });
-      const classifierRisk = riskFromFeatures(features);
-      return { bundle, source, features, classifierRisk };
+      return { bundle, source, features };
+    });
+    const triage = triageFeaturesBatch(
+      featureRows.map((row) => row.features),
+      {
+        repoRoot: opts.repoRoot || REPO_ROOT,
+        artifactPath: opts.artifactPath,
+        pythonBin: opts.pythonBin,
+      },
+    );
+    const scriptVerdicts = featureRows.map((row, index) => {
+      const decision = triage.decisions[index];
+      return {
+        bundle: row.bundle,
+        source: row.source,
+        features: row.features,
+        classifierRisk: decision.risk_score,
+        classifier_label: decision.label ?? null,
+        classifier_confidence: decision.confidence ?? null,
+      };
     });
 
     const classifierMax =
@@ -122,6 +144,8 @@ export async function scanProjectSandbox(opts) {
       script_sha256: entry.bundle.script_sha256,
       risk_score: entry.classifierRisk,
       action: decideAction(entry.classifierRisk, thresholds),
+      classifier_label: entry.classifier_label,
+      classifier_confidence: entry.classifier_confidence,
       features: {
         feature_schema_version: entry.features.feature_schema_version,
         suspicion_score: entry.features.suspicion_score,
@@ -134,8 +158,9 @@ export async function scanProjectSandbox(opts) {
     result = {
       config: "b",
       pipeline: "classifier+sandbox",
-      model_version: "features-heuristic-0.1.0",
-      feature_schema_version: "1.0.0",
+      triage_backend: triage.backend,
+      model_version: triage.model_version,
+      feature_schema_version: triage.feature_schema_version,
       dir,
       lockfile: extracted.lockfile,
       lockfile_kind: extracted.lockfile_kind,
@@ -169,7 +194,8 @@ export async function scanProjectSandbox(opts) {
     result = {
       config: "b",
       pipeline: "classifier+sandbox",
-      model_version: "features-heuristic-0.1.0",
+      triage_backend: "heuristic",
+      model_version: HEURISTIC_MODEL_VERSION,
       feature_schema_version: "1.0.0",
       dir,
       risk_score: 0,

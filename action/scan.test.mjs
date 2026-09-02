@@ -6,6 +6,7 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { decideAction, riskFromFeatures } from "./policy.mjs";
 import { run, scanProject } from "./scan.mjs";
+import { HEURISTIC_MODEL_VERSION } from "./triage.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -33,6 +34,10 @@ test("benign fixture allows; synthetic suspicious blocks", () => {
   const written = JSON.parse(readFileSync(suspicious.verdict_path, "utf8"));
   assert.equal(written.pipeline, "classifier-only");
   assert.equal(written.config, "a");
+  assert.ok(
+    written.triage_backend === "ml" ||
+      written.model_version === HEURISTIC_MODEL_VERSION,
+  );
 });
 
 test("CLI exits 0 on allow and 1 on block", () => {

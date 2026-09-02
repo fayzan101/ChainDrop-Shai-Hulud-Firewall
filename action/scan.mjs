@@ -11,8 +11,12 @@ import {
   extractFromProject,
   InterceptorError,
 } from "../interceptor/extract.mjs";
-import { decideAction, riskFromFeatures } from "./policy.mjs";
+import { decideAction } from "./policy.mjs";
 import { writeGithubOutput } from "./github-output.mjs";
+import {
+  HEURISTIC_MODEL_VERSION,
+  triageFeaturesBatch,
+} from "./triage.mjs";
 
 const ACTION_ROOT = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(ACTION_ROOT, "..");
@@ -46,11 +50,25 @@ export function scanProject(opts) {
     const extracted = extractFromProject(dir, {
       lockfile: opts.lockfile ? resolve(opts.lockfile) : undefined,
     });
-    const scriptVerdicts = extracted.bundles.map((bundle) => {
+    const featureRows = extracted.bundles.map((bundle) => {
       const source = sourceForBundle(dir, bundle);
       const features = extractFeatures({ hook: bundle.hook, source });
-      const risk_score = riskFromFeatures(features);
+      return { bundle, source, features };
+    });
+    const triage = triageFeaturesBatch(
+      featureRows.map((row) => row.features),
+      {
+        repoRoot: opts.repoRoot || REPO_ROOT,
+        artifactPath: opts.artifactPath,
+        pythonBin: opts.pythonBin,
+      },
+    );
+    const scriptVerdicts = featureRows.map((row, index) => {
+      const { bundle, features } = row;
+      const decision = triage.decisions[index];
+      const risk_score = decision.risk_score;
       const action = decideAction(risk_score, thresholds);
+      const classifierLabel = decision.label ?? null;
       return {
         package_name: bundle.package_name,
         version: bundle.version,
@@ -58,6 +76,8 @@ export function scanProject(opts) {
         script_sha256: bundle.script_sha256,
         risk_score,
         action,
+        classifier_label: classifierLabel,
+        classifier_confidence: decision.confidence ?? null,
         features: {
           feature_schema_version: features.feature_schema_version,
           suspicion_score: features.suspicion_score,
@@ -67,8 +87,12 @@ export function scanProject(opts) {
         },
         justification:
           action === "allow"
-            ? "Static features below quarantine threshold."
-            : `Static suspicion_score=${features.suspicion_score} → risk_score=${risk_score}.`,
+            ? triage.backend === "ml"
+              ? `ML triage label=${classifierLabel}; risk below quarantine.`
+              : "Static features below quarantine threshold."
+            : triage.backend === "ml"
+              ? `ML triage label=${classifierLabel} → risk_score=${risk_score}.`
+              : `Static suspicion_score=${features.suspicion_score} → risk_score=${risk_score}.`,
       };
     });
 
@@ -81,8 +105,9 @@ export function scanProject(opts) {
     result = {
       config: "a",
       pipeline: "classifier-only",
-      model_version: "features-heuristic-0.1.0",
-      feature_schema_version: "1.0.0",
+      triage_backend: triage.backend,
+      model_version: triage.model_version,
+      feature_schema_version: triage.feature_schema_version,
       dir,
       lockfile: extracted.lockfile,
       lockfile_kind: extracted.lockfile_kind,
@@ -108,7 +133,8 @@ export function scanProject(opts) {
     result = {
       config: "a",
       pipeline: "classifier-only",
-      model_version: "features-heuristic-0.1.0",
+      triage_backend: "heuristic",
+      model_version: HEURISTIC_MODEL_VERSION,
       feature_schema_version: "1.0.0",
       dir,
       risk_score: 0,

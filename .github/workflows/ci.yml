@@ -13,8 +13,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
       - name: Node fixture, interceptor, feature, and sandbox tests
         run: |
+          python -m pip install --quiet numpy scikit-learn joblib
+          PYTHONPATH=. python -m classifier.train
           npm ci
           npm test
         env:
