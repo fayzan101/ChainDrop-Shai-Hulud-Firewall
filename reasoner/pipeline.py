@@ -8,11 +8,9 @@ from rag.corpus import filter_for_corpus_version, load_documents
 from rag.redact import redact_text
 from rag.retrieve import retrieve_top_k
 from reasoner.degraded import degraded_verdict
-from reasoner.providers import FixtureReasonerProvider, ReasonerProvider
+from reasoner.providers import ReasonerProvider, load_provider, provider_prompt_version
 from reasoner.schema import ReasonerSchemaError
 from reasoner.summary import build_behavior_summary
-
-PROMPT_VERSION = "verdict-fixture-0.1.0"
 
 
 def run_reasoner_pipeline(
@@ -24,9 +22,11 @@ def run_reasoner_pipeline(
     behavior_log: dict[str, Any] | None = None,
     classifier_risk: int = 0,
     provider: ReasonerProvider | None = None,
+    provider_name: str | None = None,
     top_k: int = 8,
 ) -> dict[str, Any]:
-    provider = provider or FixtureReasonerProvider()
+    provider = provider or load_provider(provider_name)
+    prompt_version = provider_prompt_version(provider)
     redacted_source = redact_text(script_source)
     summary = build_behavior_summary(features, behavior_log)
 
@@ -58,7 +58,7 @@ def run_reasoner_pipeline(
         "behavior_summary": summary,
         "retrieved_chunks": len(retrieved),
         "corpus_version": corpus_version,
-        "prompt_version": PROMPT_VERSION,
+        "prompt_version": prompt_version,
         "reasoner_status": reasoner_status,
         "degraded": degraded,
         "risk_score": reasoner["risk_score"],
