@@ -66,7 +66,7 @@ See [architecture.md](architecture.md) §6. Summary:
 | Novel C2 (e.g. blockchain) | Hash IOCs miss; RAG may still match "exfil + republish" | Core research bet |
 | Time-delayed payload | Sandbox timeout FN | Partial; documented |
 | Logic bomb waiting for real tokens | Canaries should still be read | If malware fingerprints canary formats, FN |
-| Prompt injection | Reasoner confusion | Schema + citations + heuristic hard trips |
+| Prompt injection | Reasoner confusion | Schema + citations + heuristic hard trips (`reasoner/hard_trips.py`); regression fixtures in `fixtures/reasoner-prompt-injection/` and `reasoner/tests/test_prompt_injection.py` |
 | LLM-only path disabled | Falls back to (a)/(b) | NFR-03 |
 
 ## 7. Residual risk
