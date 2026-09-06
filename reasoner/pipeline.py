@@ -8,6 +8,7 @@ from rag.corpus import filter_for_corpus_version, load_documents
 from rag.redact import redact_text
 from rag.retrieve import retrieve_top_k
 from reasoner.degraded import degraded_verdict
+from reasoner.hard_trips import apply_hard_trips
 from reasoner.providers import FixtureReasonerProvider, ReasonerProvider
 from reasoner.schema import ReasonerSchemaError
 from reasoner.summary import build_behavior_summary
@@ -52,7 +53,14 @@ def run_reasoner_pipeline(
         reasoner_status = "degraded"
         degraded = True
 
-    return {
+    reasoner = apply_hard_trips(
+        reasoner,
+        features,
+        behavior_log,
+        classifier_risk=classifier_risk,
+    )
+
+    result = {
         "config": "c",
         "pipeline": "classifier+sandbox+rag",
         "behavior_summary": summary,
@@ -69,3 +77,6 @@ def run_reasoner_pipeline(
         "citations": reasoner["citations"],
         "uncertainty": reasoner["uncertainty"],
     }
+    if reasoner.get("hard_trips"):
+        result["hard_trips"] = reasoner["hard_trips"]
+    return result
