@@ -35,6 +35,7 @@ Cite only doc_id values present in the retrieved intelligence excerpts."""
 
 
 def _extract_json_text(content: str) -> str:
+    """Extract JSON text from an optional Markdown code fence."""
     fenced = _JSON_FENCE.search(content)
     if fenced:
         return fenced.group(1).strip()
@@ -42,6 +43,15 @@ def _extract_json_text(content: str) -> str:
 
 
 def _redact_retrieved(retrieved: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """
+    Redact retrieved intelligence entries for use in provider prompts.
+    
+    Parameters:
+    	retrieved (list[dict[str, Any]]): Retrieved intelligence entries to sanitize.
+    
+    Returns:
+    	list[dict[str, Any]]: Entries containing preserved metadata and redacted, truncated titles and text.
+    """
     redacted: list[dict[str, Any]] = []
     for chunk in retrieved:
         entry = {
@@ -61,6 +71,17 @@ def build_claude_prompt(
     retrieved: list[dict[str, Any]],
     features: dict[str, Any],
 ) -> str:
+    """
+    Build a redacted prompt for assessing npm lifecycle-script behavior against documented Shai-Hulud-lineage supply-chain techniques.
+    
+    Parameters:
+    	summary (dict[str, Any]): Observed behavior summary.
+    	retrieved (list[dict[str, Any]]): Retrieved intelligence excerpts.
+    	features (dict[str, Any]): Static analysis features.
+    
+    Returns:
+    	str: The formatted assessment prompt.
+    """
     safe_summary = redact_context(summary)
     safe_features = redact_context(features)
     safe_retrieved = _redact_retrieved(retrieved)
@@ -83,6 +104,7 @@ class ClaudeReasonerProvider:
         model: str | None = None,
         timeout_s: float = 60.0,
     ) -> None:
+        """Initialize the Claude reasoner with optional API credentials, model selection, and request timeout."""
         self._api_key = api_key or os.environ.get("ANTHROPIC_API_KEY")
         self._model = model or os.environ.get("ANTHROPIC_MODEL") or DEFAULT_MODEL
         self._timeout_s = timeout_s
@@ -93,6 +115,20 @@ class ClaudeReasonerProvider:
         retrieved: list[dict[str, Any]],
         features: dict[str, Any],
     ) -> dict[str, Any]:
+        """
+        Assess the supplied behavior, feature, and intelligence data using Claude.
+        
+        Parameters:
+            summary (dict[str, Any]): Summarized package behavior to assess.
+            retrieved (list[dict[str, Any]]): Retrieved intelligence relevant to the assessment.
+            features (dict[str, Any]): Extracted static features of the package.
+        
+        Returns:
+            dict[str, Any]: The validated provider verdict payload.
+        
+        Raises:
+            ReasonerSchemaError: If the Anthropic API key is missing or the response cannot be retrieved or parsed.
+        """
         if not self._api_key:
             raise ReasonerSchemaError("ANTHROPIC_API_KEY is not set")
         prompt = build_claude_prompt(summary, retrieved, features)
@@ -100,6 +136,18 @@ class ClaudeReasonerProvider:
         return parse_provider_payload(_extract_json_text(raw))
 
     def _call_messages_api(self, user_prompt: str) -> str:
+        """
+        Send a prompt to the Anthropic Messages API and return its text response.
+        
+        Parameters:
+        	user_prompt (str): The prompt to submit for assessment.
+        
+        Returns:
+        	str: The combined text content returned by the API.
+        
+        Raises:
+        	ReasonerSchemaError: If the API request fails or returns no text content.
+        """
         payload = {
             "model": self._model,
             "max_tokens": 1024,

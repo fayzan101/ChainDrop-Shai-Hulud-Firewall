@@ -10,6 +10,7 @@ from reasoner.pipeline import run_reasoner_pipeline
 
 
 def main() -> None:
+    """Run the RAG reasoner pipeline from command-line arguments and standard-input JSON."""
     parser = argparse.ArgumentParser(description="Run RAG reasoner pipeline")
     parser.add_argument("--documents", required=True)
     parser.add_argument("--corpus-version", default="no-chaindrop")

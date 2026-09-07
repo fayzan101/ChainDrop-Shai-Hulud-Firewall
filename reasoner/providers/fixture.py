@@ -16,6 +16,17 @@ class FixtureReasonerProvider:
         retrieved: list[dict[str, Any]],
         features: dict[str, Any],
     ) -> dict[str, Any]:
+        """
+        Assess an input summary and retrieved intelligence to produce a deterministic risk verdict.
+        
+        Parameters:
+            summary (dict[str, Any]): Analysis summary, including capabilities and uncertainty.
+            retrieved (list[dict[str, Any]]): Retrieved intelligence records used for citations and campaign matches.
+            features (dict[str, Any]): Analysis features, including the suspicion score.
+        
+        Returns:
+            dict[str, Any]: A risk verdict containing the action, score, matched techniques and campaigns, justification, citations, and uncertainty.
+        """
         suspicion = float(features.get("suspicion_score") or 0)
         canary = "credential_harvest" in summary.get("capabilities", [])
         citations = [
