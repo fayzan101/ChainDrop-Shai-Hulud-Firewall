@@ -18,6 +18,7 @@ import {
   runInSandbox,
 } from "../sandbox/run.mjs";
 import { writeGithubOutput } from "./github-output.mjs";
+import { writeGithubJobSummary } from "./job-summary.mjs";
 import { decideAction } from "./policy.mjs";
 import { sourceForBundle } from "./scan.mjs";
 import {
@@ -264,6 +265,7 @@ export async function run(
     if (opts.githubOutput) {
       writeGithubOutput(verdict);
     }
+    writeGithubJobSummary(verdict);
     io.stdout.write(
       `${JSON.stringify({ action: verdict.action, risk_score: verdict.risk_score, verdict_path: verdict.verdict_path, config: verdict.config }, null, 2)}\n`,
     );

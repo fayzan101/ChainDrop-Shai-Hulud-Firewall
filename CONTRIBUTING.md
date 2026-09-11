@@ -18,6 +18,29 @@ Thank you for helping build a defensive supply-chain firewall. Read [SECURITY.md
 5. Update the relevant document under `docs/` in the same PR if behavior or an interface changes.
 6. Add or update tests. Classifier changes need a note on whether they invalidate the held-out split (see [docs/evaluation.md](docs/evaluation.md)).
 
+### Optional pre-commit hooks
+
+Local secret scanning and held-out leak checks (same guards as CI):
+
+```bash
+pip install pre-commit
+pre-commit install
+pre-commit run --all-files
+```
+
+Hooks (see [`.pre-commit-config.yaml`](.pre-commit-config.yaml)):
+
+- **gitleaks** — refuse accidental secret commits
+- **`python -m eval.assert_heldout_metadata`** — fail if `data/scripts/metadata.jsonl` puts ChainDrop in `train`/`val` (missing file skips)
+
+To verify the held-out hook fails on a leak:
+
+```bash
+printf '%s\n' '{"script_id":"x","campaign":"chaindrop","split":"train"}' > /tmp/leak.jsonl
+PYTHONPATH=. python -m eval.assert_heldout_metadata --metadata /tmp/leak.jsonl
+# expect exit code 1
+```
+
 ## Code conventions
 
 | Area | Language | Notes |

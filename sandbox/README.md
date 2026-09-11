@@ -8,6 +8,7 @@ Isolated dry-run for evaluation configuration **(b)**: classifier + sandbox heur
 | --- | --- |
 | `Dockerfile` | Non-root image with canary credentials and capture agent |
 | `canaries/` | Fake npm / GitHub / AWS tokens (never real secrets) |
+| `canaries.example.json` | Documented canary layout (paths + obviously fake values) |
 | `capture-agent.cjs` | Runs untrusted script under hooks; emits `BehaviorLog` JSON |
 | `run.mjs` | Host orchestrator — **Docker only**, never `node script.js` on the host |
 | `policy.mjs` | Map `BehaviorLog` → `allow` / `quarantine` / `block` |
@@ -26,7 +27,7 @@ Prefer gVisor when available (`docker run --runtime=runsc …`). Standard runc i
 
 - **No Docker socket mount** — `run.mjs` rejects `/var/run/docker.sock` in argv.
 - **Network none** — egress attempts are logged, not routed to the internet.
-- **Canary credentials only** — see `canaries/`.
+- **Canary credentials only** — see `canaries/` and [`canaries.example.json`](canaries.example.json). Never copy host `~/.npmrc` into the image.
 - **Destroy after each run** — `docker run --rm`.
 - **Never execute captured scripts on the developer machine or GHA runner** — only inside the container.
 

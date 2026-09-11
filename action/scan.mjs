@@ -13,6 +13,7 @@ import {
 } from "../interceptor/extract.mjs";
 import { decideAction } from "./policy.mjs";
 import { writeGithubOutput } from "./github-output.mjs";
+import { writeGithubJobSummary } from "./job-summary.mjs";
 import {
   HEURISTIC_MODEL_VERSION,
   triageFeaturesBatch,
@@ -191,6 +192,7 @@ export function run(argv, io = { stdout: process.stdout, stderr: process.stderr 
     if (opts.githubOutput) {
       writeGithubOutput(verdict);
     }
+    writeGithubJobSummary(verdict);
     io.stdout.write(`${JSON.stringify({ action: verdict.action, risk_score: verdict.risk_score, verdict_path: verdict.verdict_path }, null, 2)}\n`);
     if (verdict.action === "allow") {
       return 0;

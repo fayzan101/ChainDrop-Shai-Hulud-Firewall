@@ -3,6 +3,8 @@ import { Test } from "@nestjs/testing";
 import request from "supertest";
 import { AppModule } from "../src/app.module";
 import { createApp } from "../src/main";
+import { prometheusRegistry } from "../src/metrics/prometheus.registry";
+import { registerPrometheusScrape } from "../src/metrics/register-prometheus";
 import { setupSwagger } from "../src/swagger";
 
 describe("API (e2e)", () => {
@@ -11,11 +13,13 @@ describe("API (e2e)", () => {
   beforeAll(async () => {
     process.env.SQLITE_PATH = ":memory:";
     delete process.env.SENTRYHULUD_API_TOKEN;
+    prometheusRegistry.reset();
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
     app = moduleRef.createNestApplication();
     app.setGlobalPrefix("v1");
+    registerPrometheusScrape(app);
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -223,6 +227,48 @@ describe("API (e2e)", () => {
     expect(response.body.openapi).toBe("3.0.0");
     expect(response.body.paths["/v1/scans"]).toBeDefined();
     expect(response.body.paths["/v1/verdicts"]).toBeDefined();
+  });
+
+  it("exposes Prometheus scrape text at /metrics after ingest", async () => {
+    await request(app.getHttpServer())
+      .post("/v1/scans")
+      .send({
+        repo: "acme/app",
+        sha: "metrics-sha",
+        run_id: "run-metrics",
+        lockfile_digest: "digest-metrics",
+        scan_payload: { config: "a", corpus_version: "no-chaindrop" },
+        verdicts: [
+          {
+            repo: "acme/app",
+            sha: "metrics-sha",
+            run_id: "run-metrics",
+            package: "pkg",
+            version: "1.0.0",
+            hook: "preinstall",
+            script_sha256: "e".repeat(64),
+            risk_score: 90,
+            action: "block",
+            attack_techniques: [],
+            matched_campaigns: [],
+            justification: "Fixture block for metrics.",
+            citations: [],
+            uncertainty: "low",
+            reasoner_status: "skipped",
+            classifier_label: "escalate",
+            corpus_version: "no-chaindrop",
+            degraded: false,
+          },
+        ],
+      })
+      .expect(201);
+
+    const scrape = await request(app.getHttpServer()).get("/metrics").expect(200);
+    expect(scrape.text).toContain("sentryhulud_scans_total");
+    expect(scrape.text).toContain("sentryhulud_blocks_total");
+    expect(scrape.text).toContain("sentryhulud_escalations_total");
+    expect(scrape.text).toContain('config="a"');
+    expect(scrape.text).toContain('corpus_version="no-chaindrop"');
   });
 });
 
