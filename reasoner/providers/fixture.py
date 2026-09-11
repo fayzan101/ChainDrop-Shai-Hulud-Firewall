@@ -1,20 +1,10 @@
-"""Reasoner providers (fixture for CI; Claude/local behind same schema in production)."""
+"""Deterministic fixture provider for CI and local development."""
 
 from __future__ import annotations
 
-import json
-from typing import Any, Protocol
+from typing import Any
 
-from reasoner.schema import ReasonerSchemaError, validate_reasoner_verdict
-
-
-class ReasonerProvider(Protocol):
-    def reason(
-        self,
-        summary: dict[str, Any],
-        retrieved: list[dict[str, Any]],
-        features: dict[str, Any],
-    ) -> dict[str, Any]: ...
+PROMPT_VERSION = "verdict-fixture-0.1.0"
 
 
 class FixtureReasonerProvider:
@@ -37,7 +27,7 @@ class FixtureReasonerProvider:
             }
             for chunk in retrieved[:3]
         ]
-        campaigns = []
+        campaigns: list[str] = []
         for chunk in retrieved:
             for tag in chunk.get("campaign_tags") or []:
                 if tag not in campaigns and tag != "reference":
@@ -66,27 +56,3 @@ class FixtureReasonerProvider:
             "citations": citations,
             "uncertainty": "low",
         }
-
-
-class InvalidJsonProvider:
-    """Test double that returns malformed JSON."""
-
-    def reason(
-        self,
-        summary: dict[str, Any],
-        retrieved: list[dict[str, Any]],
-        features: dict[str, Any],
-    ) -> dict[str, Any]:
-        raise ReasonerSchemaError("simulated invalid provider output")
-
-
-def parse_provider_payload(raw: str | dict[str, Any]) -> dict[str, Any]:
-    if isinstance(raw, dict):
-        return validate_reasoner_verdict(raw)
-    try:
-        payload = json.loads(raw)
-    except json.JSONDecodeError as err:
-        raise ReasonerSchemaError(f"invalid JSON: {err}") from err
-    if not isinstance(payload, dict):
-        raise ReasonerSchemaError("reasoner output must be a JSON object")
-    return validate_reasoner_verdict(payload)
