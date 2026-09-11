@@ -56,7 +56,7 @@ jobs:
             expect_outcome: failure
             expect_action: block
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: ./action
         id: scan
