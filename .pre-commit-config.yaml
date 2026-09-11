@@ -1,0 +1,17 @@
+# See https://pre-commit.com for install / usage.
+# Optional locally: pip install pre-commit && pre-commit install
+
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+
+  - repo: local
+    hooks:
+      - id: sentryhulud-heldout-metadata
+        name: ChainDrop must not appear in train/val metadata
+        entry: python -m eval.assert_heldout_metadata
+        language: system
+        pass_filenames: false
+        always_run: true

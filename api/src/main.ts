@@ -1,11 +1,13 @@
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
+import { registerPrometheusScrape } from "./metrics/register-prometheus";
 import { setupSwagger } from "./swagger";
 
 export async function createApp() {
   const app = await NestFactory.create(AppModule, { logger: false });
   app.setGlobalPrefix("v1");
+  registerPrometheusScrape(app);
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

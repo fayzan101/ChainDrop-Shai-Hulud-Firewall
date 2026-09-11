@@ -111,7 +111,11 @@ Evaluation CI asserts `chaindrop_documents === 0` for the experimental pin.
 
 ### `GET /v1/metrics`
 
-Prometheus scrape is preferred (`/metrics`). This JSON endpoint is for the dashboard: scan volume, block rate, p95 latency, escalation rate.
+JSON counters for the dashboard: scan volume, block rate, escalation rate.
+
+### `GET /metrics`
+
+Prometheus text exposition (no `/v1` prefix). Counters: `sentryhulud_scans_total`, `sentryhulud_blocks_total`, `sentryhulud_quarantines_total`, `sentryhulud_escalations_total`, plus `sentryhulud_scan_duration_seconds` summary. Labels: `config`, `corpus_version` only.
 
 ## Errors
 

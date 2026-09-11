@@ -1,0 +1,25 @@
+{
+  "canary_manifest_version": "1.0.0",
+  "notes": "Fake credentials for sandbox dry-runs only. Never copy host ~/.npmrc or real tokens into the image.",
+  "home": "/home/sandbox",
+  "entries": [
+    {
+      "canary_id": "npm_token",
+      "path": "/home/sandbox/.npmrc",
+      "kind": "npm_auth_token",
+      "value": "sentryhulud-canary-npm-token-DEADBEEF00000000000000000000"
+    },
+    {
+      "canary_id": "github_pat",
+      "path": "/home/sandbox/.config/gh/hosts.yml",
+      "kind": "github_pat",
+      "value": "sentryhulud-canary-github-token-AAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    {
+      "canary_id": "aws_access_key",
+      "path": "/home/sandbox/.aws/credentials",
+      "kind": "aws_credentials",
+      "value": "sentryhulud-canary-aws-key-EXAMPLE000000"
+    }
+  ]
+}

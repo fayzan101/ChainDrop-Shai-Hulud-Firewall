@@ -1,0 +1,15 @@
+# CODEOWNERS — informational review requests for FYP maintainers.
+# Does not require branch protection to be useful in the GitHub UI.
+
+* @fayzan101
+
+/interceptor/ @fayzan101
+/action/ @fayzan101
+/sandbox/ @fayzan101
+/eval/ @fayzan101
+/data/ @fayzan101
+/classifier/ @fayzan101
+/rag/ @fayzan101
+/reasoner/ @fayzan101
+/api/ @fayzan101
+/dashboard/ @fayzan101

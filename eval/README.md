@@ -24,6 +24,7 @@ Options:
 - Refuses `chaindrop_documents > 0` in the eval corpus pin
 - ChainDrop rows appear only in `split=heldout`
 - Thresholds are frozen on generation 1–3 validation **before** held-out scoring
+- CI / pre-commit: `PYTHONPATH=. python -m eval.assert_heldout_metadata` fails if `data/scripts/metadata.jsonl` puts ChainDrop in `train`/`val` (missing file = skip)
 
 ## Tests
 

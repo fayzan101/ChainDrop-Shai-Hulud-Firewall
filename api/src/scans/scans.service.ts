@@ -10,6 +10,7 @@ import { CreateScanDto } from "../dto/api.dto";
 import { ScanEntity } from "../entities/scan.entity";
 import { VerdictEntity } from "../entities/verdict.entity";
 import { serializeVerdict } from "../serialization";
+import { prometheusRegistry } from "../metrics/prometheus.registry";
 
 @Injectable()
 export class ScansService {
@@ -21,6 +22,7 @@ export class ScansService {
   ) {}
 
   async create(dto: CreateScanDto) {
+    const started = Date.now();
     const existing = await this.scans.findOne({
       where: {
         run_id: dto.run_id,
@@ -76,6 +78,22 @@ export class ScansService {
       }),
     );
     await this.verdicts.save(verdictRows);
+
+    const payload =
+      dto.scan_payload && typeof dto.scan_payload === "object"
+        ? (dto.scan_payload as Record<string, unknown>)
+        : {};
+    prometheusRegistry.recordScan({
+      config: typeof payload.config === "string" ? payload.config : null,
+      corpus_version:
+        verdictRows[0]?.corpus_version ??
+        (typeof payload.corpus_version === "string"
+          ? payload.corpus_version
+          : null),
+      actions: verdictRows.map((row) => row.action),
+      classifier_labels: verdictRows.map((row) => row.classifier_label),
+      durationSeconds: Math.max(0, (Date.now() - started) / 1000),
+    });
 
     return {
       scan_id: scan.id,
