@@ -17,7 +17,7 @@ jobs:
         with:
           working-directory: fixtures/benign-lockfile
           verdict-path: benign-verdict.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: benign-verdict
           path: benign-verdict.json
@@ -43,7 +43,7 @@ jobs:
           fi
           test -f suspicious-verdict.json
           python -c "import json; v=json.load(open('suspicious-verdict.json')); assert v['action']=='block', v"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: suspicious-verdict
