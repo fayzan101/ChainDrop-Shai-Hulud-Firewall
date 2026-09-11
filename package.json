@@ -15,6 +15,6 @@
     "test:classifier": "python -m pytest classifier/tests rag/tests reasoner/tests eval/tests -q"
   },
   "dependencies": {
-    "acorn": "^8.14.1"
+    "acorn": "^8.18.0"
   }
 }
