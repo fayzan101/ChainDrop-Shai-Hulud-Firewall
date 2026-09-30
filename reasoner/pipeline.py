@@ -26,6 +26,25 @@ def run_reasoner_pipeline(
     provider_name: str | None = None,
     top_k: int = 8,
 ) -> dict[str, Any]:
+    """
+    Run the behavior analysis pipeline and produce a reasoned risk assessment.
+    
+    Parameters:
+        script_source (str): Source text to analyze.
+        features (dict[str, Any]): Extracted behavioral features supplied to the summary and reasoner.
+        documents_path (str): Path to the retrieval corpus.
+        corpus_version (str): Corpus version used to select active documents.
+        behavior_log (dict[str, Any] | None): Optional observed behavior data.
+        classifier_risk (int): Risk score used when generating a degraded verdict.
+        provider (ReasonerProvider | None): Optional reasoner provider instance.
+        provider_name (str | None): Name of the provider to load when `provider` is not supplied.
+        top_k (int): Maximum number of relevant document chunks to retrieve.
+    
+    Returns:
+        dict[str, Any]: Pipeline metadata, behavior summary, retrieval details, reasoner status,
+        risk assessment, recommended action, attack techniques, matched campaigns,
+        justification, citations, and uncertainty.
+    """
     provider = provider or load_provider(provider_name)
     prompt_version = provider_prompt_version(provider)
     redacted_source = redact_text(script_source)

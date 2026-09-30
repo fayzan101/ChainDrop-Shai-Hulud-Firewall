@@ -10,6 +10,18 @@ from reasoner.providers.fixture import FixtureReasonerProvider, PROMPT_VERSION a
 
 
 def load_provider(name: str | None = None) -> ReasonerProvider:
+    """
+    Select a reasoner provider by name or environment configuration.
+    
+    Parameters:
+        name (str | None): Provider name to use. If omitted, the `REASONER_PROVIDER` environment variable is used, defaulting to `fixture`.
+    
+    Returns:
+        ReasonerProvider: A fixture or Claude reasoner provider.
+    
+    Raises:
+        ValueError: If the selected provider name is not `fixture` or `claude`.
+    """
     selected = (name or os.environ.get("REASONER_PROVIDER") or "fixture").strip().lower()
     if selected == "fixture":
         return FixtureReasonerProvider()
@@ -19,6 +31,14 @@ def load_provider(name: str | None = None) -> ReasonerProvider:
 
 
 def provider_prompt_version(provider: ReasonerProvider) -> str:
+    """Return the prompt version associated with a reasoner provider.
+    
+    Parameters:
+        provider (ReasonerProvider): Provider whose prompt version is being identified.
+    
+    Returns:
+        str: The Claude prompt version for Claude providers; the fixture prompt version for all other providers.
+    """
     if isinstance(provider, ClaudeReasonerProvider):
         return CLAUDE_PROMPT
     if isinstance(provider, FixtureReasonerProvider):
@@ -27,6 +47,15 @@ def provider_prompt_version(provider: ReasonerProvider) -> str:
 
 
 def provider_name(provider: ReasonerProvider) -> str:
+    """
+    Identify the name of a reasoner provider implementation.
+    
+    Parameters:
+    	provider (ReasonerProvider): The provider whose name to identify.
+    
+    Returns:
+    	str: `"claude"` for Claude providers, `"fixture"` for fixture providers, or `"custom"` for other implementations.
+    """
     if isinstance(provider, ClaudeReasonerProvider):
         return "claude"
     if isinstance(provider, FixtureReasonerProvider):

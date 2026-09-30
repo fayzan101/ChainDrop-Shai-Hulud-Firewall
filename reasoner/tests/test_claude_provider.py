@@ -49,6 +49,11 @@ class _FakeResponse:
         self._payload = payload
 
     def read(self) -> bytes:
+        """Serialize the stored payload as UTF-8 encoded JSON.
+        
+        Returns:
+        	bytes: The payload encoded as UTF-8 JSON.
+        """
         return json.dumps(self._payload).encode("utf-8")
 
     def __enter__(self) -> "_FakeResponse":
