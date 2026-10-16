@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "nest build",
-    "start": "node dist/main.js",
-    "start:dev": "nest start --watch",
+    "build": "node init && nest build",
+    "start": "node init && node dist/main.js",
+    "start:dev": "node init && nest start --watch",
     "test": "jest --runInBand --forceExit",
     "openapi:export": "ts-node --transpile-only scripts/export-openapi.ts"
   },
