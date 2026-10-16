@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "nest build",
-    "start": "node dist/main.js",
-    "start:dev": "nest start --watch",
+    "build": "node init && nest build",
+    "start": "node init && node dist/main.js",
+    "start:dev": "node init && nest start --watch",
     "test": "jest --runInBand --forceExit",
     "openapi:export": "ts-node --transpile-only scripts/export-openapi.ts"
   },
@@ -15,7 +15,7 @@
     "@nestjs/platform-express": "^10.4.15",
     "@nestjs/swagger": "^8.1.0",
     "@nestjs/typeorm": "^10.0.2",
-    "better-sqlite3": "^11.8.1",
+    "better-sqlite3": "^13.0.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "pg": "^8.13.1",
