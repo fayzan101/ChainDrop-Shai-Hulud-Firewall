@@ -1,6 +1,4 @@
 # Secrets and local config
-.env
-.env.*
 !.env.example
 *.pem
 *.key
@@ -55,7 +53,6 @@ sandbox/captures/
 .DS_Store
 Thumbs.db
 .idea/
-.vscode/
 *.swp
 
 # Logs and local databases
@@ -70,3 +67,4 @@ eval/reports/tmp/
 
 # Local GitHub issue body drafts
 .github/issue-drafts/
+config.bat
