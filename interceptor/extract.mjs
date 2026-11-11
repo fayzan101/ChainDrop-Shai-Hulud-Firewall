@@ -2,13 +2,18 @@
  * Phase 1 interceptor: capture npm lifecycle scripts from a lockfile + local
  * package.json files. Never execute those scripts and never spawn a package
  * manager install.
+ *
+ * Fail-closed rules:
+ * - npm: packages with hasInstallScript must have package.json on disk
+ * - yarn/pnpm: dependency graph not yet extracted — refuse (INCOMPLETE_COVERAGE)
  */
 
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
-import { basename, join, relative } from "node:path";
+import { basename, isAbsolute, join, normalize, relative, sep } from "node:path";
 
-export const HOOKS = ["preinstall", "install", "postinstall"];
+/** Lifecycle hooks we capture. `prepare` runs for git deps on install. */
+export const HOOKS = ["preinstall", "install", "postinstall", "prepare"];
 
 /** Prefer npm, then pnpm, then Yarn when several lockfiles exist. */
 export const LOCKFILE_CANDIDATES = [
@@ -67,12 +72,42 @@ export function sha256Utf8(bytes) {
 }
 
 /**
+ * Resolve a JS/CJS/MJS file referenced by a lifecycle command.
+ * Rejects absolute paths and any `..` escape outside the package directory.
+ *
  * @param {string} command
  * @returns {string | null}
  */
 export function referencedJsFile(command) {
-  const m = command.match(/\bnode(?:\.exe)?\s+["']?([^\s"']+\.js)/i);
-  return m ? m[1] : null;
+  const m = command.match(
+    /\bnode(?:\.exe)?\s+(?:--\S+\s+)*["']?([^\s"']+\.(?:js|cjs|mjs))["']?/i,
+  );
+  if (!m) {
+    return null;
+  }
+  const rel = m[1];
+  if (isAbsolute(rel) || rel.split(/[/\\]/).includes("..")) {
+    return null;
+  }
+  return rel;
+}
+
+/**
+ * Ensure a resolved script path stays inside packageDir.
+ * @param {string} packageDir
+ * @param {string} relPath
+ * @returns {string | null}
+ */
+export function safeScriptPath(packageDir, relPath) {
+  const resolved = normalize(join(packageDir, relPath));
+  const root = normalize(packageDir + sep);
+  if (resolved !== normalize(packageDir) && !resolved.startsWith(root)) {
+    return null;
+  }
+  if (!existsSync(resolved)) {
+    return null;
+  }
+  return resolved;
 }
 
 /**
@@ -91,32 +126,80 @@ export function bundlesFromPackageJson(pkg, opts) {
   const scripts = pkg.scripts && typeof pkg.scripts === "object" ? pkg.scripts : {};
   /** @type {object[]} */
   const out = [];
+
+  // Implicit node-gyp rebuild when binding.gyp exists and no install script.
+  const bindingPath = join(packageDir, "binding.gyp");
+  const hasBinding = existsSync(bindingPath);
+  const hasInstall = typeof scripts.install === "string" && scripts.install.length > 0;
+
   for (const hook of HOOKS) {
     const command = scripts[hook];
     if (typeof command !== "string" || command.length === 0) {
       continue;
     }
-    const relJs = referencedJsFile(command);
-    const filePath = relJs ? join(packageDir, relJs) : null;
-    let source_path = "inline:package.json";
-    let scriptBytes = command;
-    if (filePath && existsSync(filePath)) {
-      scriptBytes = readFileSync(filePath, "utf8");
-      source_path = relative(lockDir, filePath).replaceAll("\\", "/") || relJs;
-    }
-    out.push({
-      package_name: pkg.name || basename(packageDir),
-      version: pkg.version || "0.0.0",
-      hook,
-      integrity: integrity || "local",
-      resolved: resolved ?? null,
-      script_sha256: sha256Utf8(scriptBytes),
-      source_path,
-      inline_command: command,
-      parent_chain: parentChain || [],
-    });
+    out.push(
+      bundleForCommand(pkg, {
+        packageDir,
+        lockDir,
+        integrity,
+        resolved,
+        parentChain,
+        hook,
+        command,
+      }),
+    );
   }
+
+  if (hasBinding && !hasInstall) {
+    out.push(
+      bundleForCommand(pkg, {
+        packageDir,
+        lockDir,
+        integrity,
+        resolved,
+        parentChain,
+        hook: "install",
+        command: "node-gyp rebuild",
+      }),
+    );
+  }
+
   return out;
+}
+
+/**
+ * @param {object} pkg
+ * @param {object} opts
+ */
+function bundleForCommand(pkg, opts) {
+  const {
+    packageDir,
+    lockDir,
+    integrity,
+    resolved,
+    parentChain,
+    hook,
+    command,
+  } = opts;
+  const relJs = referencedJsFile(command);
+  const filePath = relJs ? safeScriptPath(packageDir, relJs) : null;
+  let source_path = "inline:package.json";
+  let scriptBytes = command;
+  if (filePath) {
+    scriptBytes = readFileSync(filePath, "utf8");
+    source_path = relative(lockDir, filePath).replaceAll("\\", "/") || relJs;
+  }
+  return {
+    package_name: pkg.name || basename(packageDir),
+    version: pkg.version || "0.0.0",
+    hook,
+    integrity: integrity || "local",
+    resolved: resolved ?? null,
+    script_sha256: sha256Utf8(scriptBytes),
+    source_path,
+    inline_command: command,
+    parent_chain: parentChain || [],
+  };
 }
 
 /**
@@ -135,8 +218,7 @@ export function lockfileKind(lockPath) {
 }
 
 /**
- * Extract ScriptBundle[] from a project directory. Offline: only packages that
- * already have a package.json on disk (root and unpacked node_modules).
+ * Extract ScriptBundle[] from a project directory.
  *
  * @param {string} dir
  * @param {{ lockfile?: string }} [options]
@@ -161,12 +243,23 @@ export function extractFromProject(dir, options = {}) {
     const entries = Object.keys(packages).length
       ? Object.entries(packages)
       : [["", {}]];
+
+    /** @type {string[]} */
+    const missingInstallScripts = [];
+
     for (const [pkgPath, meta] of entries) {
       const packageDir = pkgPath === "" ? dir : join(dir, pkgPath);
       const pkgJsonPath = join(packageDir, "package.json");
-      if (!existsSync(pkgJsonPath)) {
+      const onDisk = existsSync(pkgJsonPath);
+
+      if (meta && meta.hasInstallScript && !onDisk) {
+        missingInstallScripts.push(pkgPath || "(root)");
         continue;
       }
+      if (!onDisk) {
+        continue;
+      }
+
       const pkg = JSON.parse(readFileSync(pkgJsonPath, "utf8"));
       const parentChain =
         pkgPath === ""
@@ -182,16 +275,22 @@ export function extractFromProject(dir, options = {}) {
         }),
       );
     }
+
+    if (missingInstallScripts.length > 0) {
+      throw new InterceptorError(
+        `npm lockfile marks hasInstallScript but package.json is not on disk for: ${missingInstallScripts.join(", ")}. ` +
+          "Run `npm ci --ignore-scripts`, then this Action, then `npm rebuild` if policy allows. " +
+          "Fail closed — refusing empty/partial scan.",
+        "MISSING_INSTALL_SCRIPT_PACKAGES",
+      );
+    }
   } else {
-    // Yarn / pnpm: root package.json only until tarball fetch (#22).
-    bundles.push(
-      ...bundlesFromPackageJson(rootPkg, {
-        packageDir: dir,
-        lockDir: dir,
-        integrity: "local",
-        resolved: null,
-        parentChain: [],
-      }),
+    // Yarn / pnpm dependency graph not yet extracted (issue #22 / #33).
+    throw new InterceptorError(
+      `${kind} lockfile detected but dependency lifecycle scripts are not yet enumerated ` +
+        "(root-only would silently allow). Fail closed until tarball/workspace support lands. " +
+        "Use an npm package-lock.json for the CI gate, or set fail-open (not recommended).",
+      "INCOMPLETE_COVERAGE",
     );
   }
 
@@ -199,5 +298,6 @@ export function extractFromProject(dir, options = {}) {
     lockfile: lockPath,
     lockfile_kind: kind,
     bundles,
+    coverage: "npm-on-disk",
   };
 }

@@ -26,7 +26,8 @@ Prefer gVisor when available (`docker run --runtime=runsc …`). Standard runc i
 ## Security invariants
 
 - **No Docker socket mount** — `run.mjs` rejects `/var/run/docker.sock` in argv.
-- **Network none** — egress attempts are logged, not routed to the internet.
+- **Network none** — egress attempts are logged via hooks (`http`/`https`/`fetch`/`dns`), not routed to the internet. Prefer an egress sinkhole sidecar later (#50).
+- **Package context** — `run.mjs` stages `package.json` and sibling files with the primary script (not a single-file copy).
 - **Canary credentials only** — see `canaries/` and [`canaries.example.json`](canaries.example.json). Never copy host `~/.npmrc` into the image.
 - **Destroy after each run** — `docker run --rm`.
 - **Never execute captured scripts on the developer machine or GHA runner** — only inside the container.

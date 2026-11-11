@@ -22,7 +22,7 @@ function assertScriptBundle(bundle, label) {
   for (const key of required) {
     assert.ok(bundle[key], `${label} missing ${key}`);
   }
-  assert.match(bundle.hook, /^(preinstall|install|postinstall)$/);
+  assert.match(bundle.hook, /^(preinstall|install|postinstall|prepare)$/);
   assert.match(bundle.script_sha256, /^[a-f0-9]{64}$/);
 }
 
@@ -40,6 +40,7 @@ test("ScriptBundle schema lists required fields", () => {
     "preinstall",
     "install",
     "postinstall",
+    "prepare",
   ]);
 });
 

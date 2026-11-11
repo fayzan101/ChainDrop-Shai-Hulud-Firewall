@@ -1,0 +1,30 @@
+{
+  "model_version": "triage-synth-0.1.0",
+  "feature_schema_version": "1.0.0",
+  "feature_keys": [
+    "entropy",
+    "source_length",
+    "eval_count",
+    "function_ctor_count",
+    "spawn_count",
+    "http_count",
+    "fs_count",
+    "homedir_count",
+    "credential_hits",
+    "api_text_hits",
+    "download_and_execute",
+    "ident_mean_length",
+    "unparseable",
+    "suspicion_score",
+    "hook_preinstall",
+    "hook_install",
+    "hook_postinstall"
+  ],
+  "val_fpr": 0.0,
+  "val_f1": 1.0,
+  "n_train": 60,
+  "n_val": 16,
+  "backend": "sklearn.HistGradientBoostingClassifier",
+  "linear_backend": "sklearn.LogisticRegression",
+  "notes": "Trained on synthetic feature rows (generations 1\u20133 + benign). ChainDrop excluded. Replace with frozen paper model when the labeled store is ready."
+}

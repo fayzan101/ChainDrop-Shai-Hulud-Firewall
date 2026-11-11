@@ -30,6 +30,25 @@ test("config (b) blocks synthetic suspicious via classifier escalation", async (
   assert.equal(verdict.action, "block");
   assert.equal(verdict.classifier_escalated, true);
   assert.equal(verdict.sandbox_escalated, false);
+  assert.equal(verdict.degraded, false);
+});
+
+test("config (b) marks degraded when escalation needed but Docker is unavailable", async () => {
+  const { dockerAvailable } = await import("../sandbox/run.mjs");
+  if (await dockerAvailable()) {
+    // Runner has Docker — skip (CI docker integration covers the non-degraded path).
+    return;
+  }
+  const outDir = mkdtempSync(join(tmpdir(), "sentryhulud-sbx-deg-"));
+  const verdict = await scanProjectSandbox({
+    dir: join(root, "fixtures/synthetic-suspicious"),
+    verdictPath: join(outDir, "degraded.json"),
+    sandbox: true,
+  });
+  assert.equal(verdict.action, "block");
+  assert.equal(verdict.degraded, true);
+  assert.equal(verdict.sandbox_skipped_reason, "docker_unavailable");
+  assert.equal(verdict.sandbox_escalated, false);
 });
 
 test("config (b) records canary hits from injected behavior log", async () => {
