@@ -5,13 +5,16 @@
 import { spawn } from "node:child_process";
 import {
   copyFileSync,
+  existsSync,
   mkdtempSync,
   mkdirSync,
+  readdirSync,
   rmSync,
+  statSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const SANDBOX_ROOT = dirname(fileURLToPath(import.meta.url));
@@ -36,19 +39,64 @@ export function assertSafeDockerArgs(args) {
 }
 
 /**
+ * Copy packageDir contents (non-recursive siblings + package.json) into dest.
+ * Limits blast radius: max 40 files, skip node_modules and huge blobs.
+ *
+ * @param {string} packageDir
+ * @param {string} destDir
+ * @param {string} scriptPath
+ * @returns {string} relative script path inside destDir
+ */
+export function stagePackageContext(packageDir, destDir, scriptPath) {
+  mkdirSync(destDir, { recursive: true });
+  const pkgJson = join(packageDir, "package.json");
+  if (existsSync(pkgJson)) {
+    copyFileSync(pkgJson, join(destDir, "package.json"));
+  }
+
+  let copied = 0;
+  const entries = readdirSync(packageDir);
+  for (const name of entries) {
+    if (copied >= 40) {
+      break;
+    }
+    if (name === "node_modules" || name === ".git") {
+      continue;
+    }
+    const src = join(packageDir, name);
+    const st = statSync(src);
+    if (!st.isFile() || st.size > 512 * 1024) {
+      continue;
+    }
+    copyFileSync(src, join(destDir, name));
+    copied += 1;
+  }
+
+  // Ensure the primary script is present even if above filters skipped it.
+  const rel = relative(packageDir, scriptPath).replaceAll("\\", "/") || basename(scriptPath);
+  const destScript = join(destDir, rel);
+  if (!existsSync(destScript)) {
+    mkdirSync(dirname(destScript), { recursive: true });
+    copyFileSync(scriptPath, destScript);
+  }
+  return rel;
+}
+
+/**
  * @param {object} opts
  * @returns {Promise<object>} BehaviorLog
  */
 export async function runInSandbox(opts) {
   const scriptPath = resolve(opts.scriptPath);
+  const packageDir = resolve(opts.packageDir || dirname(scriptPath));
   const scriptId = opts.scriptId || scriptPath;
   const image = opts.image || DEFAULT_IMAGE;
   const timeoutMs = Number(opts.timeoutMs ?? 5000);
   const dockerBin = opts.dockerBin || "docker";
 
   const workDir = mkdtempSync(join(tmpdir(), "sentryhulud-sbx-"));
-  const containerScript = join(workDir, "script.js");
-  copyFileSync(scriptPath, containerScript);
+  const stagedDir = join(workDir, "pkg");
+  const relScript = stagePackageContext(packageDir, stagedDir, scriptPath);
 
   const dockerArgs = [
     "run",
@@ -69,10 +117,12 @@ export async function runInSandbox(opts) {
     `SENTRYHULUD_SCRIPT_ID=${scriptId}`,
     "-e",
     `SENTRYHULUD_TIMEOUT_MS=${timeoutMs}`,
+    "-e",
+    "npm_config_ignore_scripts=true",
     "-v",
-    `${containerScript}:/work/script.js:ro`,
+    `${stagedDir}:/work/pkg:ro`,
     image,
-    "/work/script.js",
+    `/work/pkg/${relScript}`,
   ];
 
   assertSafeDockerArgs(dockerArgs);

@@ -113,23 +113,33 @@ export async function scanProjectSandbox(opts) {
     const shouldEscalate =
       primary && primary.classifierRisk >= thresholds.quarantine;
 
-    if (
-      shouldEscalate &&
-      sandboxEnabled &&
-      !behaviorLogPath &&
-      (await dockerAvailable())
-    ) {
-      const scriptPath = scriptPathForBundle(dir, primary.bundle);
-      if (scriptPath) {
-        if (opts.buildSandboxImage) {
-          await buildSandboxImage({ image: opts.sandboxImage });
+    let sandboxDegraded = false;
+    let sandboxSkippedReason = null;
+    const wantSandbox =
+      shouldEscalate && sandboxEnabled && !behaviorLogPath;
+
+    if (wantSandbox) {
+      const dockerOk = await dockerAvailable();
+      if (!dockerOk) {
+        sandboxDegraded = true;
+        sandboxSkippedReason = "docker_unavailable";
+      } else {
+        const scriptPath = scriptPathForBundle(dir, primary.bundle);
+        if (scriptPath) {
+          if (opts.buildSandboxImage) {
+            await buildSandboxImage({ image: opts.sandboxImage });
+          }
+          behaviorLog = await runInSandbox({
+            scriptPath,
+            packageDir: dirname(scriptPath),
+            scriptId: primary.bundle.script_sha256,
+            image: opts.sandboxImage,
+            timeoutMs: opts.sandboxTimeoutMs,
+          });
+        } else {
+          sandboxDegraded = true;
+          sandboxSkippedReason = "inline_script_no_file";
         }
-        behaviorLog = await runInSandbox({
-          scriptPath,
-          scriptId: primary.bundle.script_sha256,
-          image: opts.sandboxImage,
-          timeoutMs: opts.sandboxTimeoutMs,
-        });
       }
     }
 
@@ -156,6 +166,11 @@ export async function scanProjectSandbox(opts) {
       },
     }));
 
+    let justification = policy.justification;
+    if (sandboxDegraded) {
+      justification = `${justification} [degraded: sandbox skipped (${sandboxSkippedReason}); classifier-only]`;
+    }
+
     result = {
       config: "b",
       pipeline: "classifier+sandbox",
@@ -167,12 +182,13 @@ export async function scanProjectSandbox(opts) {
       lockfile_kind: extracted.lockfile_kind,
       risk_score: policy.risk_score,
       action: policy.action,
-      degraded: false,
+      degraded: sandboxDegraded,
       reasoner_status: "skipped",
       thresholds,
       sandbox_escalated:
-        shouldEscalate && sandboxEnabled && !behaviorLogPath,
+        Boolean(shouldEscalate && sandboxEnabled && !behaviorLogPath && !sandboxDegraded),
       classifier_escalated: shouldEscalate,
+      sandbox_skipped_reason: sandboxSkippedReason,
       behavior_log: {
         timeout: Boolean(behaviorLog.timeout),
         canary_hits: (behaviorLog.canary_hits || []).map((hit) => hit.canary_id),
@@ -182,7 +198,7 @@ export async function scanProjectSandbox(opts) {
         ).length,
       },
       scripts,
-      justification: policy.justification,
+      justification,
     };
   } catch (err) {
     const message =

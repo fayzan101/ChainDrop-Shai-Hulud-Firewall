@@ -26,7 +26,9 @@ Pin to a commit SHA (not `main`):
     verdict-path: sentryhulud-verdict.json
 ```
 
-Config **(b)** requires Docker on the runner. All configs train/load `classifier/artifacts/triage.joblib` when Python is available; without the artifact, scans fall back to Phase-2 heuristic scoring (`features-heuristic-0.1.0`).
+**Required consumer order:** `npm ci --ignore-scripts` → this Action → `npm rebuild` (only if allowed). See [docs/github-action.md](../docs/github-action.md).
+
+Config **(b)** requires Docker for detonation; if Docker is missing while escalation is needed, the verdict sets `degraded: true` and stays classifier-only. All configs load the shipped `classifier/artifacts/triage.joblib` (Action install uses `npm ci --ignore-scripts` and pinned `classifier/requirements.txt`).
 
 ## Local CLI
 
