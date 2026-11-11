@@ -25,7 +25,7 @@
     },
     "hook": {
       "type": "string",
-      "enum": ["preinstall", "install", "postinstall"]
+      "enum": ["preinstall", "install", "postinstall", "prepare"]
     },
     "integrity": {
       "type": "string",

@@ -1,10 +1,12 @@
 # GitHub Action
 
-Composite or JavaScript Action that wraps dependency installation for npm/yarn/pnpm projects.
+Composite Action that gates npm CI on lifecycle-script risk. **Default posture:** fail closed, never execute install hooks on the host/runner, never pass `GITHUB_TOKEN` into the sandbox.
 
-**Default posture:** fail closed, do not execute lifecycle scripts until policy says `allow`, never pass `GITHUB_TOKEN` into the sandbox.
+## Required CI order (npm)
 
-## Example workflow
+The interceptor only reads `package.json` files that are **already on disk**. Before `npm ci` (without `--ignore-scripts`), `node_modules` is empty and any lockfile entry with `hasInstallScript: true` causes a **fail-closed** error. After a normal `npm ci`, lifecycle scripts have already run.
+
+Use this order:
 
 ```yaml
 name: ci
@@ -26,6 +28,10 @@ jobs:
           node-version: "20"
           cache: npm
 
+      # 1) Unpack deps without running lifecycle scripts
+      - run: npm ci --ignore-scripts
+
+      # 2) Scan scripts that are now on disk (never executes them)
       - uses: fayzan101/ChainDrop-Shai-Hulud-Firewall/action@<full-commit-sha>
         with:
           working-directory: .
@@ -34,35 +40,43 @@ jobs:
           threshold-block: "80"
           verdict-path: sentryhulud-verdict.json
 
+      # 3) Only if the Action allowed: run deferred install scripts
+      - run: npm rebuild
+        if: success()
+
       - run: npm test
         if: success()
 ```
 
-Local equivalent:
+## Lockfile support
+
+| Lockfile | Gate behavior |
+| --- | --- |
+| `package-lock.json` / `npm-shrinkwrap.json` | Supported. Missing on-disk `package.json` for any `hasInstallScript: true` entry ⇒ fail closed. |
+| `pnpm-lock.yaml` / `yarn.lock` | **Fail closed** until dependency enumeration / tarball fetch lands. Use npm lockfiles for the CI gate. |
+
+## Local equivalent
 
 ```bash
+npm ci --ignore-scripts
 node action/scan.mjs --dir . --out sentryhulud-verdict.json          # config (a)
 node action/scan-sandbox.mjs --dir . --out sentryhulud-verdict.json  # config (b)
 node action/scan-rag.mjs --dir . --out sentryhulud-verdict.json      # config (c)
 ```
 
-The composite Action selects the scan via the `config` input (`a` | `b` | `c`). Config **(a)** and **(b)** load `classifier/artifacts/triage.joblib` when present (trained on first Action run); otherwise they fall back to Phase-2 heuristic scoring. Config **(b)** builds the sandbox image when Docker is available; config **(c)** runs the fixture reasoner with `corpus-version: no-chaindrop`.
+Configs **(a)/(b)/(c)** load the shipped `classifier/artifacts/triage.joblib` (pinned Python deps in `classifier/requirements.txt`). Action install uses `npm ci --ignore-scripts`. Config **(b)** sets `degraded: true` when Docker is unavailable and escalation was required.
 
 Until the Action is published under a release tag, pin a commit SHA as above.
-
 
 ## Inputs
 
 | Input | Required | Default | Description |
 | --- | --- | --- | --- |
 | `config` | no | `a` | `a` (classifier) \| `b` (sandbox) \| `c` (rag) |
-| `package-manager` | no | `npm` | `npm` \| `yarn` \| `pnpm` |
 | `lockfile` | no | auto-detect | Path to lockfile |
-| `api-url` | no | empty | If empty, run classifier locally and skip org persistence |
-| `api-token` | no | empty | Auth to NestJS API |
 | `corpus-version` | no | `no-chaindrop` | RAG corpus pin for config **(c)** |
 | `threshold-quarantine` | no | `40` | Inclusive lower bound |
-| `threshold-block` | no | `80` | Exclusive of quarantine band; scores `>` this block |
+| `threshold-block` | no | `80` | Scores `>` this block |
 | `fail-open` | no | `false` | If true, interceptor errors warn only (not recommended) |
 | `sandbox` | no | `true` | Sandbox dry-run for config **(b)** |
 | `working-directory` | no | `.` | Monorepo package path |
@@ -74,9 +88,9 @@ Exact bound inclusivity must match [srs.md](srs.md): `< 40` allow, `40–80` qua
 | Output | Description |
 | --- | --- |
 | `action` | `allow` \| `quarantine` \| `block` |
-| `risk_score` | 0–100 (max across scripts, or graph aggregate — document in implementation) |
+| `risk_score` | 0–100 |
 | `verdict_path` | Path to `sentryhulud-verdict.json` |
-| `degraded` | `true` if LLM/vector store failed |
+| `degraded` | `true` if sandbox skipped (no Docker) or fail-open recovered |
 
 ## Permissions
 
@@ -89,7 +103,9 @@ Never mount `~/.npm` from the runner into the sandbox container.
 | Situation | `fail-open=false` | `fail-open=true` |
 | --- | --- | --- |
 | No lockfile | step failure | warn, skip scan |
-| Sandbox crash | quarantine | warn |
+| `hasInstallScript` package not on disk | step failure | warn |
+| yarn/pnpm lockfile | step failure | warn |
+| Sandbox / Docker unavailable (config b escalate) | `degraded=true`, classifier policy | same |
 | LLM down | heuristic policy | heuristic policy |
 | `action=block` | step failure | step failure (policy still applies) |
 
@@ -99,4 +115,4 @@ Upload `sentryhulud-verdict.json` and (if present) redacted `BehaviorLog` with s
 
 ## Composite vs JS
 
-Semester 1 may ship a composite Action that calls Node and Python via `actions/setup-python`. Semester 2 should bundle a single JS Action plus a prebuilt classifier to cut setup time (NFR-01).
+Semester 1 ships a composite Action that calls Node and Python via `actions/setup-python`. Semester 2 should bundle a single JS Action plus the prebuilt classifier to cut setup time (NFR-01).

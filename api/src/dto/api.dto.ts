@@ -64,9 +64,9 @@ export class VerdictInputDto {
   @IsNotEmpty()
   version!: string;
 
-  @ApiProperty({ enum: ["preinstall", "install", "postinstall"] })
-  @IsIn(["preinstall", "install", "postinstall"])
-  hook!: "preinstall" | "install" | "postinstall";
+  @ApiProperty({ enum: ["preinstall", "install", "postinstall", "prepare"] })
+  @IsIn(["preinstall", "install", "postinstall", "prepare"])
+  hook!: "preinstall" | "install" | "postinstall" | "prepare";
 
   @ApiProperty({
     example: "a".repeat(64),

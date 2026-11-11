@@ -35,7 +35,7 @@
     "version": { "type": "string", "minLength": 1 },
     "hook": {
       "type": "string",
-      "enum": ["preinstall", "install", "postinstall"]
+      "enum": ["preinstall", "install", "postinstall", "prepare"]
     },
     "script_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "risk_score": { "type": "integer", "minimum": 0, "maximum": 100 },
